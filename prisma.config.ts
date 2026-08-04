@@ -1,0 +1,25 @@
+import { config, parse } from "dotenv";
+import { existsSync, readFileSync } from "fs";
+import { defineConfig } from "prisma/config";
+
+// Next.js 컨벤션과 동일하게 .env를 기본값으로 로드하고,
+// .env.local에 값이 채워진 키만 덮어쓴다 (빈 값("")으로 실수로 덮어쓰지 않도록).
+config();
+if (existsSync(".env.local")) {
+  const local = parse(readFileSync(".env.local"));
+  for (const [key, value] of Object.entries(local)) {
+    if (value !== "") process.env[key] = value;
+  }
+}
+
+export default defineConfig({
+  schema: "prisma/schema.prisma",
+  migrations: {
+    path: "prisma/migrations",
+  },
+  // Migrate/introspect는 direct(비풀링) 연결이 필요 — 앱 런타임은 별도로
+  // src/lib/prisma.ts의 어댑터가 DATABASE_URL(pooled)로 접속한다.
+  datasource: {
+    url: process.env["DIRECT_URL"],
+  },
+});
