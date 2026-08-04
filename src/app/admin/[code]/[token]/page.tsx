@@ -1,12 +1,17 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
+import Link from "next/link";
 import { toPoints } from "@/lib/points";
+import { computeFinalBetAmount } from "@/lib/game";
 import RoundControls from "./RoundControls";
 import ResultForm from "./ResultForm";
 import NextRoundButton from "./NextRoundButton";
 import LinksPanel from "./LinksPanel";
+import EventPanel from "./EventPanel";
+import GameControls from "./GameControls";
 import PollRefresh from "@/components/PollRefresh";
+import FinalRanking from "@/components/FinalRanking";
 
 export default async function AdminPage({
   params,
@@ -41,12 +46,17 @@ export default async function AdminPage({
   return (
     <main className="mx-auto flex min-h-dvh max-w-2xl flex-col gap-6 px-6 py-10">
       <PollRefresh />
-      <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold">진행자 화면</h1>
-        <p className="text-neutral-500">
-          게임방 코드 <span className="font-mono font-bold">{room.code}</span> · ROUND{" "}
-          {room.currentRound}
-        </p>
+      <header className="flex items-start justify-between gap-1">
+        <div>
+          <h1 className="text-2xl font-bold">진행자 화면</h1>
+          <p className="text-neutral-500">
+            게임방 코드 <span className="font-mono font-bold">{room.code}</span> · ROUND{" "}
+            {room.currentRound}
+          </p>
+        </div>
+        <Link href={`/admin/${room.code}/${room.adminToken}/history`} className="text-sm text-blue-600">
+          기록/되돌리기
+        </Link>
       </header>
 
       <section className="grid grid-cols-2 gap-4">
@@ -76,32 +86,58 @@ export default async function AdminPage({
         })}
       </section>
 
-      <section className="flex justify-center">
-        <RoundControls
-          roomCode={room.code}
-          adminToken={room.adminToken}
-          roundStatus={round?.status ?? "WAITING"}
+      {room.status === "ENDED" ? (
+        <FinalRanking
+          team1Name={room.teams[0].name}
+          team2Name={room.teams[1].name}
+          team1Points={toPoints(room.teams[0].currentPoints)}
+          team2Points={toPoints(room.teams[1].currentPoints)}
         />
-      </section>
+      ) : (
+        <>
+          <section className="flex justify-center">
+            <RoundControls
+              roomCode={room.code}
+              adminToken={room.adminToken}
+              roundStatus={round?.status ?? "WAITING"}
+            />
+          </section>
 
-      {round?.status === "BETTING" &&
-        room.teams.every((t) => betByTeam.get(t.id)?.confirmed) && (
-          <ResultForm
-            roomCode={room.code}
-            adminToken={room.adminToken}
-            team1Name={room.teams[0].name}
-            team2Name={room.teams[1].name}
-            team1FinalBet={toPoints(betByTeam.get(room.teams[0].id)?.amount ?? BigInt(0))}
-            team2FinalBet={toPoints(betByTeam.get(room.teams[1].id)?.amount ?? BigInt(0))}
-            multiplier={Number(round.multiplier)}
-          />
-        )}
+          {round?.status === "BETTING" &&
+            room.teams.every((t) => betByTeam.get(t.id)?.confirmed) && (
+              <ResultForm
+                roomCode={room.code}
+                adminToken={room.adminToken}
+                team1Name={room.teams[0].name}
+                team2Name={room.teams[1].name}
+                team1FinalBet={toPoints(await computeFinalBetAmount(round.id, room.teams[0].id))}
+                team2FinalBet={toPoints(await computeFinalBetAmount(round.id, room.teams[1].id))}
+                multiplier={Number(round.multiplier)}
+              />
+            )}
 
-      {round?.status === "RESOLVED" && (
-        <section className="flex justify-center">
-          <NextRoundButton roomCode={room.code} adminToken={room.adminToken} />
-        </section>
+          <section className="flex justify-center">
+            <EventPanel
+              roomCode={room.code}
+              adminToken={room.adminToken}
+              team1Name={room.teams[0].name}
+              team2Name={room.teams[1].name}
+              team1Points={toPoints(room.teams[0].currentPoints)}
+              team2Points={toPoints(room.teams[1].currentPoints)}
+            />
+          </section>
+
+          {round?.status === "RESOLVED" && (
+            <section className="flex justify-center">
+              <NextRoundButton roomCode={room.code} adminToken={room.adminToken} />
+            </section>
+          )}
+        </>
       )}
+
+      <section className="flex justify-center">
+        <GameControls roomCode={room.code} adminToken={room.adminToken} />
+      </section>
 
       <section className="flex justify-center">
         <LinksPanel

@@ -1,8 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { toPoints } from "@/lib/points";
+import { getVisibleEventForTeam } from "@/lib/events";
 import { notFound } from "next/navigation";
 import BetForm from "./BetForm";
+import ExtraBetForm from "./ExtraBetForm";
+import EventPopup from "./EventPopup";
 import PollRefresh from "@/components/PollRefresh";
+import FinalRanking from "@/components/FinalRanking";
 
 export default async function PlayPage({
   params,
@@ -51,6 +55,14 @@ export default async function PlayPage({
         })
       : null;
 
+  const pendingExtraBet = round
+    ? await prisma.extraBetRequest.findUnique({
+        where: { roundId_teamId: { roundId: round.id, teamId: me.id } },
+      })
+    : null;
+
+  const visibleEvent = await getVisibleEventForTeam(room.id, me, opponent);
+
   const maxBet =
     me.currentPoints > BigInt(0) ? toPoints(me.currentPoints) : toPoints(room.negativeBetLimit);
 
@@ -65,7 +77,28 @@ export default async function PlayPage({
         </p>
       </header>
 
+      {room.status === "ENDED" ? (
+        <FinalRanking
+          team1Name={room.teams.find((t) => t.teamNo === 1)!.name}
+          team2Name={room.teams.find((t) => t.teamNo === 2)!.name}
+          team1Points={toPoints(room.teams.find((t) => t.teamNo === 1)!.currentPoints)}
+          team2Points={toPoints(room.teams.find((t) => t.teamNo === 2)!.currentPoints)}
+        />
+      ) : (
+        <>
       <p className="text-center text-neutral-500">ROUND {room.currentRound}</p>
+
+      <EventPopup event={visibleEvent} />
+
+      {pendingExtraBet?.status === "PENDING" && (
+        <ExtraBetForm
+          roomCode={room.code}
+          teamToken={me.accessToken}
+          minAmount={toPoints(pendingExtraBet.minAmount)}
+          maxAmount={pendingExtraBet.maxAmount !== null ? toPoints(pendingExtraBet.maxAmount) : null}
+          reason={pendingExtraBet.reason}
+        />
+      )}
 
       {round?.status === "BETTING" && !myBet?.confirmed && (
         <BetForm roomCode={room.code} teamToken={me.accessToken} maxBet={maxBet} />
@@ -108,6 +141,8 @@ export default async function PlayPage({
           <p className="text-neutral-500">라운드 시작을 기다리고 있어요.</p>
           <p className="text-xs text-neutral-400">상대 팀: {opponent.name}</p>
         </div>
+      )}
+        </>
       )}
     </main>
   );

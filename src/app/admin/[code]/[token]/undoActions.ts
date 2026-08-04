@@ -1,0 +1,209 @@
+"use server";
+
+import { prisma } from "@/lib/prisma";
+import { assertAdmin } from "@/lib/admin";
+import { applyScoreDelta } from "@/lib/game";
+import { revalidatePath } from "next/cache";
+
+function refresh(roomCode: string, adminToken: string) {
+  revalidatePath(`/admin/${roomCode}/${adminToken}`);
+  revalidatePath(`/admin/${roomCode}/${adminToken}/history`);
+}
+
+type UndoResult = { ok: boolean; warning?: string; laterCount?: number };
+
+export async function manualAdjustScore(
+  roomCode: string,
+  adminToken: string,
+  teamNo: number,
+  mode: "delta" | "set",
+  value: number,
+  memo?: string
+) {
+  const room = await assertAdmin(roomCode, adminToken);
+  if (!Number.isFinite(value)) {
+    throw new Error("올바른 값을 입력해주세요");
+  }
+
+  const team = await prisma.team.findFirst({ where: { roomId: room.id, teamNo } });
+  if (!team) {
+    throw new Error("팀을 찾을 수 없습니다");
+  }
+
+  const delta =
+    mode === "delta" ? BigInt(Math.trunc(value)) : BigInt(Math.trunc(value)) - team.currentPoints;
+
+  await prisma.$transaction(async (tx) => {
+    await applyScoreDelta(tx, {
+      roomId: room.id,
+      teamId: team.id,
+      delta,
+      sourceType: "MANUAL_ADJUST",
+      memo: memo || null,
+    });
+  });
+
+  refresh(roomCode, adminToken);
+}
+
+async function countLaterTransactions(teamId: string, after: Date) {
+  return prisma.scoreTransaction.count({
+    where: { teamId, createdAt: { gt: after } },
+  });
+}
+
+export async function undoRoundResult(
+  roomCode: string,
+  adminToken: string,
+  roundId: string,
+  force = false
+): Promise<UndoResult> {
+  const room = await assertAdmin(roomCode, adminToken);
+
+  const results = await prisma.roundResult.findMany({
+    where: { roundId, reverted: false, round: { roomId: room.id } },
+  });
+  if (results.length === 0) {
+    throw new Error("되돌릴 결과를 찾을 수 없습니다");
+  }
+
+  const txs = await prisma.scoreTransaction.findMany({
+    where: { sourceType: "BET_RESULT", sourceId: { in: results.map((r) => r.id) } },
+  });
+
+  let laterCount = 0;
+  for (const tx of txs) {
+    laterCount += await countLaterTransactions(tx.teamId, tx.createdAt);
+  }
+  if (laterCount > 0 && !force) {
+    return { ok: false, warning: "later_changes", laterCount };
+  }
+
+  await prisma.$transaction(async (tx) => {
+    for (const scoreTx of txs) {
+      await applyScoreDelta(tx, {
+        roomId: room.id,
+        roundId: scoreTx.roundId,
+        teamId: scoreTx.teamId,
+        delta: -scoreTx.pointsDelta,
+        sourceType: "REVERT",
+        sourceId: scoreTx.id,
+        memo: "결과 되돌리기",
+      });
+    }
+    await tx.roundResult.updateMany({
+      where: { id: { in: results.map((r) => r.id) } },
+      data: { reverted: true, revertedAt: new Date() },
+    });
+    await tx.round.update({ where: { id: roundId }, data: { status: "RESULT_PENDING" } });
+  });
+
+  refresh(roomCode, adminToken);
+  return { ok: true };
+}
+
+export async function undoEvent(
+  roomCode: string,
+  adminToken: string,
+  eventLogId: string,
+  force = false
+): Promise<UndoResult> {
+  const room = await assertAdmin(roomCode, adminToken);
+
+  const event = await prisma.eventLog.findFirst({
+    where: { id: eventLogId, roomId: room.id },
+  });
+  if (!event) {
+    throw new Error("이벤트를 찾을 수 없습니다");
+  }
+  if (event.reverted) {
+    throw new Error("이미 되돌린 이벤트입니다");
+  }
+
+  const txs = await prisma.scoreTransaction.findMany({
+    where: { eventLogId: event.id },
+  });
+
+  let laterCount = 0;
+  for (const tx of txs) {
+    laterCount += await countLaterTransactions(tx.teamId, tx.createdAt);
+  }
+  if (laterCount > 0 && !force) {
+    return { ok: false, warning: "later_changes", laterCount };
+  }
+
+  await prisma.$transaction(async (tx) => {
+    for (const scoreTx of txs) {
+      await applyScoreDelta(tx, {
+        roomId: room.id,
+        roundId: scoreTx.roundId,
+        teamId: scoreTx.teamId,
+        delta: -scoreTx.pointsDelta,
+        sourceType: "REVERT",
+        sourceId: scoreTx.id,
+        memo: "이벤트 되돌리기",
+      });
+    }
+
+    if (event.eventType === "BET_MULTIPLIER" && event.roundId) {
+      await tx.round.update({ where: { id: event.roundId }, data: { multiplier: 1 } });
+    } else if (event.eventType === "FORCED_EXTRA_BET" && event.roundId) {
+      await tx.extraBetRequest.updateMany({
+        where: { roundId: event.roundId, status: "PENDING" },
+        data: { status: "CANCELLED" },
+      });
+    } else if (event.eventType === "ASSIGNED_EXTRA_BET" && event.roundId) {
+      await tx.bet.deleteMany({
+        where: { roundId: event.roundId, betType: "FORCED_EXTRA", confirmedAt: { gte: event.executedAt } },
+      });
+    }
+
+    await tx.eventLog.update({ where: { id: event.id }, data: { reverted: true, revertedAt: new Date() } });
+  });
+
+  refresh(roomCode, adminToken);
+  return { ok: true };
+}
+
+export async function undoManualAdjust(
+  roomCode: string,
+  adminToken: string,
+  transactionId: string,
+  force = false
+): Promise<UndoResult> {
+  const room = await assertAdmin(roomCode, adminToken);
+
+  const scoreTx = await prisma.scoreTransaction.findFirst({
+    where: { id: transactionId, roomId: room.id, sourceType: "MANUAL_ADJUST" },
+  });
+  if (!scoreTx) {
+    throw new Error("되돌릴 점수 수정을 찾을 수 없습니다");
+  }
+
+  const alreadyReverted = await prisma.scoreTransaction.findFirst({
+    where: { sourceType: "REVERT", sourceId: scoreTx.id },
+  });
+  if (alreadyReverted) {
+    throw new Error("이미 되돌린 수정입니다");
+  }
+
+  const laterCount = await countLaterTransactions(scoreTx.teamId, scoreTx.createdAt);
+  if (laterCount > 0 && !force) {
+    return { ok: false, warning: "later_changes", laterCount };
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await applyScoreDelta(tx, {
+      roomId: room.id,
+      roundId: scoreTx.roundId,
+      teamId: scoreTx.teamId,
+      delta: -scoreTx.pointsDelta,
+      sourceType: "REVERT",
+      sourceId: scoreTx.id,
+      memo: "점수 수정 되돌리기",
+    });
+  });
+
+  refresh(roomCode, adminToken);
+  return { ok: true };
+}

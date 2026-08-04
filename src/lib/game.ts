@@ -1,4 +1,44 @@
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@/generated/prisma/client";
+
+type TxClient = Prisma.TransactionClient;
+
+export async function applyScoreDelta(
+  tx: TxClient,
+  params: {
+    roomId: string;
+    roundId?: string | null;
+    teamId: string;
+    delta: bigint;
+    sourceType: "EVENT" | "MANUAL_ADJUST" | "REVERT";
+    sourceId?: string | null;
+    eventLogId?: string | null;
+    memo?: string | null;
+  }
+) {
+  const team = await tx.team.findUniqueOrThrow({ where: { id: params.teamId } });
+  const before = team.currentPoints;
+  const after = before + params.delta;
+
+  await tx.team.update({ where: { id: params.teamId }, data: { currentPoints: after } });
+
+  await tx.scoreTransaction.create({
+    data: {
+      roomId: params.roomId,
+      roundId: params.roundId ?? null,
+      teamId: params.teamId,
+      sourceType: params.sourceType,
+      sourceId: params.sourceId ?? null,
+      eventLogId: params.eventLogId ?? null,
+      pointsBefore: before,
+      pointsDelta: params.delta,
+      pointsAfter: after,
+      memo: params.memo ?? null,
+    },
+  });
+
+  return { before, after };
+}
 
 export async function computeFinalBetAmount(roundId: string, teamId: string): Promise<bigint> {
   const bets = await prisma.bet.findMany({
