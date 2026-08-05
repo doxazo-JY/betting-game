@@ -19,11 +19,11 @@ export default function FinalRanking({
         GAME OVER
       </span>
       {ranking.type === "winner" ? (
-        <p className="text-3xl font-black">
-          🏆 {ranking.winnerTeamNo === 1 ? team1Name : team2Name} 우승!
+        <p className="text-3xl font-black text-win-ink">
+          {ranking.winnerTeamNo === 1 ? team1Name : team2Name} 우승!
         </p>
       ) : (
-        <p className="text-3xl font-black">🤝 공동 우승</p>
+        <p className="text-3xl font-black text-win-ink">공동 우승</p>
       )}
       <div className="flex gap-4">
         <div className="border-2 border-ink bg-team-red-tint px-5 py-3">

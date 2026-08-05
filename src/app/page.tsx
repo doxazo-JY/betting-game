@@ -25,7 +25,7 @@ export default function Home() {
           href="/watch"
           className="border-2 border-ink bg-paper-2 px-6 py-5 text-lg font-black shadow-sticker-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
         >
-          🖥 중계 화면 열기
+          중계 화면 열기
         </Link>
         <p className="text-sm font-semibold text-ink-soft">
           팀 대표는 진행자에게 받은 접속 링크로 바로 들어가시면 됩니다.

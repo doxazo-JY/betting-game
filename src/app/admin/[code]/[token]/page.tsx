@@ -114,8 +114,8 @@ export default async function AdminPage({
 
       {activeMultiplierEvent && round && Number(round.multiplier) !== 1 && (
         <div className="flex flex-col items-center gap-2 border-2 border-ink bg-event-tint px-4 py-3 text-center">
-          <p className="font-black text-event-ink">
-            ⚡ 배팅 배수 {Number(round.multiplier)}배 적용 중
+          <p className="flex items-center gap-2 font-black text-event-ink">
+            <span className="icon-bolt" /> 배팅 배수 {Number(round.multiplier)}배 적용 중
           </p>
           <UndoButton
             label="이 이벤트 취소"

@@ -36,8 +36,8 @@ export default function EventPopup({ event }: { event: EventViewProps | null }) 
       {showPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-6">
           <div className="animate-pop-in flex w-full max-w-sm flex-col items-center gap-3 border-[3px] border-ink bg-paper-2 p-7 text-center shadow-sticker">
-            <span className="flex h-12 w-12 items-center justify-center border-2 border-ink bg-event text-2xl font-black text-white">
-              ⚡
+            <span className="flex h-12 w-12 items-center justify-center border-2 border-ink bg-event text-white">
+              <span className="icon-bolt" style={{ width: 16, height: 26 }} />
             </span>
             <p className="text-lg font-black">{event.title}</p>
             {hasDelta ? (

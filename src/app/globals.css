@@ -80,6 +80,20 @@ body {
   color: var(--ink);
   font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui,
     sans-serif;
+  /* 한글은 어절(단어) 단위로만 줄바꿈되게 — 기본값은 음절 사이 아무 데서나
+     끊어서 좁은 화면에서 단어가 이상하게 잘려 보인다. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* 벼락 아이콘 — 이벤트를 나타내는 데 이모지 대신 CSS로 그린 도형을 쓴다.
+   컬러 이모지는 플랫한 픽셀 톤과 부딪혀서 "AI가 대충 붙인 장식"처럼 보인다. */
+.icon-bolt {
+  display: inline-block;
+  width: 12px;
+  height: 20px;
+  background: currentColor;
+  clip-path: polygon(60% 0%, 15% 58%, 42% 58%, 32% 100%, 85% 38%, 55% 38%);
 }
 
 .font-pixel {

@@ -71,7 +71,9 @@ export default function EventPanel({
   if (picked === "SWAP_ALL") {
     return (
       <div className="flex flex-col gap-4 border-[3px] border-ink bg-paper-2 p-5 shadow-sticker-sm">
-        <p className="font-black">⚡ 전체 점수 교환을 실행하시겠습니까?</p>
+        <p className="flex items-center gap-2 font-black">
+          <span className="icon-bolt text-event" /> 전체 점수 교환을 실행하시겠습니까?
+        </p>
         <p className="text-sm font-semibold">
           {team1Name}: {team1Points.toLocaleString()}P → {team2Points.toLocaleString()}P
         </p>
@@ -103,7 +105,9 @@ export default function EventPanel({
   if (picked === "BET_MULTIPLIER") {
     return (
       <div className="flex flex-col gap-4 border-[3px] border-ink bg-paper-2 p-5 shadow-sticker-sm">
-        <p className="font-black">⚡ 배팅 배수 이벤트</p>
+        <p className="flex items-center gap-2 font-black">
+          <span className="icon-bolt text-event" /> 배팅 배수 이벤트
+        </p>
         <input
           value={multiplier}
           onChange={(e) => setMultiplier(e.target.value)}
@@ -145,15 +149,15 @@ export default function EventPanel({
     <div className="flex gap-3">
       <button
         onClick={() => setPicked("SWAP_ALL")}
-        className="flex-1 border-2 border-ink bg-paper-2 px-4 py-3 font-black text-event-ink shadow-sticker-sm"
+        className="flex flex-1 items-center justify-center gap-2 border-2 border-ink bg-paper-2 px-4 py-3 font-black text-event-ink shadow-sticker-sm"
       >
-        ⚡ 전체 점수 교환
+        <span className="icon-bolt" /> 전체 점수 교환
       </button>
       <button
         onClick={() => setPicked("BET_MULTIPLIER")}
-        className="flex-1 border-2 border-ink bg-paper-2 px-4 py-3 font-black text-event-ink shadow-sticker-sm"
+        className="flex flex-1 items-center justify-center gap-2 border-2 border-ink bg-paper-2 px-4 py-3 font-black text-event-ink shadow-sticker-sm"
       >
-        ⚡ 배팅 배수
+        <span className="icon-bolt" /> 배팅 배수
       </button>
     </div>
   );

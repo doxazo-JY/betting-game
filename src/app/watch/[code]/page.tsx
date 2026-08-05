@@ -118,7 +118,7 @@ export default async function WatchPage({
             <p className="text-xl font-bold text-ink-soft">라운드 시작을 기다리는 중...</p>
           )}
           {round?.status === "BETTING" && bothConfirmed && (
-            <p className="text-xl font-black text-event-ink">⚡ 게임 진행 중</p>
+            <p className="text-xl font-black text-event-ink">게임 진행 중</p>
           )}
 
           {activeMultiplierEvent && round && (
