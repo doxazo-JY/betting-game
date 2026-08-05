@@ -137,9 +137,9 @@ export default function EventPanel({
   }
 
   // 점수 교환은 라운드와 무관하게 즉시 바뀌는 이벤트라 배팅 중에는 막고,
-  // 배팅 배수는 이번 라운드 결과 계산에 반영되는 이벤트라 결과가 나온 뒤엔 막는다.
+  // 배팅 배수는 라운드 시작(배팅 개시) 전에만 설정할 수 있다.
   const canSwap = roundStatus !== "BETTING";
-  const canMultiplier = roundStatus !== "RESOLVED";
+  const canMultiplier = roundStatus === "WAITING";
 
   if (!canSwap && !canMultiplier) return null;
 

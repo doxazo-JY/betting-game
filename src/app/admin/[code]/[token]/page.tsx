@@ -18,6 +18,9 @@ import UndoButton from "./UndoButton";
 import { undoEvent } from "./undoActions";
 import { getActiveMultiplierEvent } from "@/lib/activeMultiplier";
 
+// 실시간 게임 상태를 보여주는 페이지라 절대 캐싱하면 안 된다.
+export const dynamic = "force-dynamic";
+
 export default async function AdminPage({
   params,
 }: {

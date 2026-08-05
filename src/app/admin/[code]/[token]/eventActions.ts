@@ -58,8 +58,9 @@ export async function executeBetMultiplier(roomCode: string, adminToken: string,
   if (!multiplier || multiplier <= 0) {
     throw new Error("올바른 배수를 입력해주세요");
   }
-  if (round.status === "RESOLVED") {
-    throw new Error("이미 결과가 적용된 라운드입니다");
+  // 배팅이 시작된 뒤에는 배수를 바꿀 수 없다 (라운드 시작 전에만 설정 가능).
+  if (round.status !== "WAITING") {
+    throw new Error("배팅이 시작된 라운드에는 배팅 배수를 설정할 수 없습니다. 라운드 시작 전에 설정해주세요");
   }
 
   await prisma.$transaction([
