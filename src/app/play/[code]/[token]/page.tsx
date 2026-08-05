@@ -56,17 +56,28 @@ export default async function PlayPage({
         })
       : null;
 
+  // 배팅 금액은 라운드가 끝나기 전까지만 비공개다. 결과가 나온 뒤에는
+  // 상대 팀 배팅 금액도 공개해도 된다.
+  const opponentResult =
+    round?.status === "RESOLVED"
+      ? await prisma.roundResult.findUnique({
+          where: { roundId_teamId: { roundId: round.id, teamId: opponent.id } },
+        })
+      : null;
+
   const visibleEvent = await getVisibleEventForTeam(room.id, me);
   const activeMultiplierEvent = await getActiveMultiplierEvent(room.id, round?.id, round?.status);
 
   const maxBet =
     me.currentPoints > BigInt(0) ? toPoints(me.currentPoints) : toPoints(room.negativeBetLimit);
 
-  const resultAmount = myResult
-    ? myResult.outcome === "WIN"
-      ? Math.trunc(toPoints(myResult.finalBetAmount) * Number(round!.multiplier))
-      : toPoints(myResult.finalBetAmount)
-    : 0;
+  function calcResultAmount(result: { outcome: string; finalBetAmount: bigint }) {
+    return result.outcome === "WIN"
+      ? Math.trunc(toPoints(result.finalBetAmount) * Number(round!.multiplier))
+      : toPoints(result.finalBetAmount);
+  }
+
+  const resultAmount = myResult ? calcResultAmount(myResult) : 0;
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col gap-6 px-6 py-10">
@@ -145,6 +156,20 @@ export default async function PlayPage({
                 {myResult.outcome === "WIN" ? "획득" : "차감"} 포인트:{" "}
                 {myResult.outcome === "WIN" ? "+" : "-"}
                 {resultAmount.toLocaleString()}P
+              </p>
+            </div>
+          )}
+
+          {opponentResult && (
+            <div className="flex flex-col items-center gap-1 rounded-xl border border-neutral-200 p-4 text-center text-sm dark:border-neutral-800">
+              <p className="font-medium text-neutral-500">{opponent.name} 결과</p>
+              <p>
+                {toPoints(opponentResult.finalBetAmount).toLocaleString()}P 배팅 ·{" "}
+                {opponentResult.outcome === "WIN" ? "승리" : "패배"}{" "}
+                <span className={opponentResult.outcome === "WIN" ? "text-green-600" : "text-red-600"}>
+                  ({opponentResult.outcome === "WIN" ? "+" : "-"}
+                  {calcResultAmount(opponentResult).toLocaleString()}P)
+                </span>
               </p>
             </div>
           )}

@@ -76,15 +76,20 @@ export default async function WatchPage({
                     {toPoints(team.currentPoints).toLocaleString()}P
                   </p>
                   {result && (
-                    <p
-                      className={
-                        result.outcome === "WIN"
-                          ? "text-2xl font-bold text-green-500"
-                          : "text-2xl font-bold text-red-500"
-                      }
-                    >
-                      {result.outcome === "WIN" ? "🏆 승리" : "💥 패배"}
-                    </p>
+                    <>
+                      <p
+                        className={
+                          result.outcome === "WIN"
+                            ? "text-2xl font-bold text-green-500"
+                            : "text-2xl font-bold text-red-500"
+                        }
+                      >
+                        {result.outcome === "WIN" ? "🏆 승리" : "💥 패배"}
+                      </p>
+                      <p className="text-neutral-400">
+                        {toPoints(result.finalBetAmount).toLocaleString()}P 배팅
+                      </p>
+                    </>
                   )}
                   {round?.status === "BETTING" && (
                     <p
