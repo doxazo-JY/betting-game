@@ -61,9 +61,6 @@ model Room {
   startPoints      BigInt     @default(500)
   negativeBetLimit BigInt     @default(500)
   currentRound     Int        @default(1)
-  soundEnabled     Boolean    @default(true)
-  vibrationEnabled Boolean    @default(true)
-  spectatorEnabled Boolean    @default(false)
   createdAt        DateTime   @default(now())
 
   teams             Team[]
