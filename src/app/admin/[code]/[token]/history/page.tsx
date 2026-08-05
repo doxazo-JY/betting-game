@@ -112,10 +112,7 @@ export default async function HistoryPage({
               <p className={event.reverted ? "font-medium text-neutral-400 line-through" : "font-medium"}>
                 {EVENT_LABELS[event.eventType]}
               </p>
-              <p className="text-xs text-neutral-500">
-                {event.targetScope} · {event.revealMode} · {event.executedAt.toLocaleString("ko-KR")}
-              </p>
-              {event.memo && <p className="text-xs text-neutral-400">메모: {event.memo}</p>}
+              <p className="text-xs text-neutral-500">{event.executedAt.toLocaleString("ko-KR")}</p>
             </div>
             {!event.reverted && (
               <UndoButton label="되돌리기" onUndo={undoEvent.bind(null, room.code, room.adminToken, event.id)} />

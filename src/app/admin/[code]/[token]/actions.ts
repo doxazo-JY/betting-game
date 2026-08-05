@@ -56,7 +56,9 @@ export async function applyRoundResult(
     for (const team of teams) {
       const outcome = outcomes[team.teamNo];
       const finalBet = await computeFinalBetAmount(round.id, team.id);
-      const magnitude = applyMultiplier(finalBet, multiplier);
+      // 배수는 승리 시 획득 포인트에만 적용된다. 패배 시에는 배수와 무관하게
+      // 배팅한 금액만 잃는다.
+      const magnitude = outcome === "WIN" ? applyMultiplier(finalBet, multiplier) : finalBet;
       const delta = outcome === "WIN" ? magnitude : -magnitude;
       const before = team.currentPoints;
       const after = before + delta;

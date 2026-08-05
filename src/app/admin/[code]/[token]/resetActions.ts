@@ -29,7 +29,6 @@ export async function resetRoom(roomCode: string, adminToken: string, confirmTex
   await prisma.$transaction([
     prisma.scoreTransaction.deleteMany({ where: { roomId: room.id } }),
     prisma.eventLog.deleteMany({ where: { roomId: room.id } }),
-    prisma.extraBetRequest.deleteMany({ where: { roundId: { in: roundIds } } }),
     prisma.roundResult.deleteMany({ where: { roundId: { in: roundIds } } }),
     prisma.bet.deleteMany({ where: { roundId: { in: roundIds } } }),
     prisma.round.deleteMany({ where: { roomId: room.id } }),

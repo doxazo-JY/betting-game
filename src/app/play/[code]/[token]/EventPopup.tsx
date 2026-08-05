@@ -5,11 +5,9 @@ import { useState } from "react";
 type EventViewProps = {
   id: string;
   title: string;
-  isMine: boolean;
   myDelta: number | null;
   myPointsBefore: number | null;
   myPointsAfter: number | null;
-  needsAction: boolean;
 };
 
 export default function EventPopup({ event }: { event: EventViewProps | null }) {
@@ -40,7 +38,7 @@ export default function EventPopup({ event }: { event: EventViewProps | null }) 
           <div className="flex w-full max-w-sm flex-col items-center gap-3 rounded-2xl bg-white p-6 text-center dark:bg-neutral-900">
             <p className="text-2xl font-extrabold">🚨 이벤트 발생!</p>
             <p className="text-lg font-bold">{event.title}</p>
-            {event.isMine && hasDelta && (
+            {hasDelta ? (
               <>
                 <p className="text-sm text-neutral-500">
                   변경 전 보유 포인트: {event.myPointsBefore!.toLocaleString()}P
@@ -53,15 +51,9 @@ export default function EventPopup({ event }: { event: EventViewProps | null }) 
                   현재 보유 포인트: {event.myPointsAfter!.toLocaleString()}P
                 </p>
               </>
+            ) : (
+              <p className="text-sm text-neutral-500">자세한 내용은 결과에 반영됩니다.</p>
             )}
-            {event.isMine && !hasDelta && (
-              <p className="text-sm text-neutral-500">
-                {event.needsAction
-                  ? "추가 배팅이 필요합니다. 아래에서 입력해주세요."
-                  : "자세한 내용은 결과에 반영됩니다."}
-              </p>
-            )}
-            {!event.isMine && <p className="text-sm text-neutral-500">상대 팀에 이벤트가 적용되었습니다.</p>}
             <button
               onClick={() => setShowPopup(false)}
               className="mt-2 w-full rounded-xl bg-blue-600 py-3 font-bold text-white"
@@ -76,8 +68,12 @@ export default function EventPopup({ event }: { event: EventViewProps | null }) 
         <p className="font-medium text-purple-700 dark:text-purple-300">최근 이벤트</p>
         <p>
           🔥 {event.title}
-          {event.isMine && hasDelta && (
-            <span> ({event.myDelta! >= 0 ? "+" : ""}{event.myDelta!.toLocaleString()}P)</span>
+          {hasDelta && (
+            <span>
+              {" "}
+              ({event.myDelta! >= 0 ? "+" : ""}
+              {event.myDelta!.toLocaleString()}P)
+            </span>
           )}
         </p>
       </div>

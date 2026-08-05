@@ -147,15 +147,6 @@ export async function undoEvent(
 
     if (event.eventType === "BET_MULTIPLIER" && event.roundId) {
       await tx.round.update({ where: { id: event.roundId }, data: { multiplier: 1 } });
-    } else if (event.eventType === "FORCED_EXTRA_BET" && event.roundId) {
-      await tx.extraBetRequest.updateMany({
-        where: { roundId: event.roundId, status: "PENDING" },
-        data: { status: "CANCELLED" },
-      });
-    } else if (event.eventType === "ASSIGNED_EXTRA_BET" && event.roundId) {
-      await tx.bet.deleteMany({
-        where: { roundId: event.roundId, betType: "FORCED_EXTRA", confirmedAt: { gte: event.executedAt } },
-      });
     }
 
     await tx.eventLog.update({ where: { id: event.id }, data: { reverted: true, revertedAt: new Date() } });

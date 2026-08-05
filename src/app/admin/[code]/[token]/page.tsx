@@ -4,11 +4,10 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { toPoints } from "@/lib/points";
 import { computeFinalBetAmount } from "@/lib/game";
-import RoundControls from "./RoundControls";
 import ResultForm from "./ResultForm";
 import NextRoundButton from "./NextRoundButton";
 import LinksPanel from "./LinksPanel";
-import EventPanel from "./EventPanel";
+import GameFlowPanel from "./GameFlowPanel";
 import GameControls from "./GameControls";
 import PollRefresh from "@/components/PollRefresh";
 import FinalRanking from "@/components/FinalRanking";
@@ -33,9 +32,7 @@ export default async function AdminPage({
     where: { roomId_roundNo: { roomId: room.id, roundNo: room.currentRound } },
   });
 
-  const bets = round
-    ? await prisma.bet.findMany({ where: { roundId: round.id, betType: "NORMAL" } })
-    : [];
+  const bets = round ? await prisma.bet.findMany({ where: { roundId: round.id } }) : [];
   const betByTeam = new Map(bets.map((b) => [b.teamId, b]));
 
   const headerList = await headers();
@@ -96,10 +93,14 @@ export default async function AdminPage({
       ) : (
         <>
           <section className="flex justify-center">
-            <RoundControls
+            <GameFlowPanel
               roomCode={room.code}
               adminToken={room.adminToken}
               roundStatus={round?.status ?? "WAITING"}
+              team1Name={room.teams[0].name}
+              team2Name={room.teams[1].name}
+              team1Points={toPoints(room.teams[0].currentPoints)}
+              team2Points={toPoints(room.teams[1].currentPoints)}
             />
           </section>
 
@@ -115,17 +116,6 @@ export default async function AdminPage({
                 multiplier={Number(round.multiplier)}
               />
             )}
-
-          <section className="flex justify-center">
-            <EventPanel
-              roomCode={room.code}
-              adminToken={room.adminToken}
-              team1Name={room.teams[0].name}
-              team2Name={room.teams[1].name}
-              team1Points={toPoints(room.teams[0].currentPoints)}
-              team2Points={toPoints(room.teams[1].currentPoints)}
-            />
-          </section>
 
           {round?.status === "RESOLVED" && (
             <section className="flex justify-center">

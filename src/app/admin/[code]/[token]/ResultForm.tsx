@@ -26,8 +26,9 @@ export default function ResultForm({
   const [isPending, startTransition] = useTransition();
 
   function delta(isWinner: boolean, finalBet: number) {
-    const magnitude = Math.trunc(finalBet * multiplier);
-    return isWinner ? magnitude : -magnitude;
+    // 배수는 승리 시에만 적용되고, 패배 시에는 배팅한 금액만 잃는다.
+    if (isWinner) return Math.trunc(finalBet * multiplier);
+    return -finalBet;
   }
 
   function submit() {

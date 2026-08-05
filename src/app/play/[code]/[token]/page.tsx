@@ -3,7 +3,6 @@ import { toPoints } from "@/lib/points";
 import { getVisibleEventForTeam } from "@/lib/events";
 import { notFound } from "next/navigation";
 import BetForm from "./BetForm";
-import ExtraBetForm from "./ExtraBetForm";
 import EventPopup from "./EventPopup";
 import PollRefresh from "@/components/PollRefresh";
 import FinalRanking from "@/components/FinalRanking";
@@ -36,15 +35,13 @@ export default async function PlayPage({
 
   const myBet = round
     ? await prisma.bet.findUnique({
-        where: { roundId_teamId_betType: { roundId: round.id, teamId: me.id, betType: "NORMAL" } },
+        where: { roundId_teamId: { roundId: round.id, teamId: me.id } },
       })
     : null;
 
   const opponentBet = round
     ? await prisma.bet.findUnique({
-        where: {
-          roundId_teamId_betType: { roundId: round.id, teamId: opponent.id, betType: "NORMAL" },
-        },
+        where: { roundId_teamId: { roundId: round.id, teamId: opponent.id } },
       })
     : null;
 
@@ -55,16 +52,16 @@ export default async function PlayPage({
         })
       : null;
 
-  const pendingExtraBet = round
-    ? await prisma.extraBetRequest.findUnique({
-        where: { roundId_teamId: { roundId: round.id, teamId: me.id } },
-      })
-    : null;
-
-  const visibleEvent = await getVisibleEventForTeam(room.id, me, opponent);
+  const visibleEvent = await getVisibleEventForTeam(room.id, me);
 
   const maxBet =
     me.currentPoints > BigInt(0) ? toPoints(me.currentPoints) : toPoints(room.negativeBetLimit);
+
+  const resultAmount = myResult
+    ? myResult.outcome === "WIN"
+      ? Math.trunc(toPoints(myResult.finalBetAmount) * Number(round!.multiplier))
+      : toPoints(myResult.finalBetAmount)
+    : 0;
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col gap-6 px-6 py-10">
@@ -86,62 +83,52 @@ export default async function PlayPage({
         />
       ) : (
         <>
-      <p className="text-center text-neutral-500">ROUND {room.currentRound}</p>
+          <p className="text-center text-neutral-500">ROUND {room.currentRound}</p>
 
-      <EventPopup event={visibleEvent} />
+          <EventPopup event={visibleEvent} />
 
-      {pendingExtraBet?.status === "PENDING" && (
-        <ExtraBetForm
-          roomCode={room.code}
-          teamToken={me.accessToken}
-          minAmount={toPoints(pendingExtraBet.minAmount)}
-          maxAmount={pendingExtraBet.maxAmount !== null ? toPoints(pendingExtraBet.maxAmount) : null}
-          reason={pendingExtraBet.reason}
-        />
-      )}
+          {round?.status === "BETTING" && !myBet?.confirmed && (
+            <BetForm roomCode={room.code} teamToken={me.accessToken} maxBet={maxBet} />
+          )}
 
-      {round?.status === "BETTING" && !myBet?.confirmed && (
-        <BetForm roomCode={room.code} teamToken={me.accessToken} maxBet={maxBet} />
-      )}
+          {round?.status === "BETTING" && myBet?.confirmed && (
+            <div className="flex flex-col items-center gap-2 rounded-xl border border-green-300 p-6 text-center dark:border-green-800">
+              <p className="text-xl font-bold">✅ 배팅 완료</p>
+              <p className="text-sm text-neutral-500">결과가 입력될 때까지 기다려주세요.</p>
+              <p className="mt-2 text-xs text-neutral-400">
+                상대 팀: {opponentBet?.confirmed ? "배팅 완료" : "배팅 대기 중"}
+              </p>
+            </div>
+          )}
 
-      {round?.status === "BETTING" && myBet?.confirmed && (
-        <div className="flex flex-col items-center gap-2 rounded-xl border border-green-300 p-6 text-center dark:border-green-800">
-          <p className="text-xl font-bold">✅ 배팅 완료</p>
-          <p className="text-sm text-neutral-500">결과가 입력될 때까지 기다려주세요.</p>
-          <p className="mt-2 text-xs text-neutral-400">
-            상대 팀: {opponentBet?.confirmed ? "배팅 완료" : "배팅 대기 중"}
-          </p>
-        </div>
-      )}
+          {myResult && (
+            <div
+              className={
+                myResult.outcome === "WIN"
+                  ? "flex flex-col items-center gap-2 rounded-xl border border-green-400 bg-green-50 p-6 text-center dark:border-green-700 dark:bg-green-950"
+                  : "flex flex-col items-center gap-2 rounded-xl border border-red-400 bg-red-50 p-6 text-center dark:border-red-700 dark:bg-red-950"
+              }
+            >
+              <p className="text-2xl font-extrabold">
+                {myResult.outcome === "WIN" ? "🏆 승리!" : "💥 패배"}
+              </p>
+              <p className="text-sm">
+                최종 배팅 포인트: {toPoints(myResult.finalBetAmount).toLocaleString()}P
+              </p>
+              <p className={myResult.outcome === "WIN" ? "text-sm text-green-600" : "text-sm text-red-600"}>
+                {myResult.outcome === "WIN" ? "획득" : "차감"} 포인트:{" "}
+                {myResult.outcome === "WIN" ? "+" : "-"}
+                {resultAmount.toLocaleString()}P
+              </p>
+            </div>
+          )}
 
-      {myResult && (
-        <div
-          className={
-            myResult.outcome === "WIN"
-              ? "flex flex-col items-center gap-2 rounded-xl border border-green-400 bg-green-50 p-6 text-center dark:border-green-700 dark:bg-green-950"
-              : "flex flex-col items-center gap-2 rounded-xl border border-red-400 bg-red-50 p-6 text-center dark:border-red-700 dark:bg-red-950"
-          }
-        >
-          <p className="text-2xl font-extrabold">
-            {myResult.outcome === "WIN" ? "🏆 승리!" : "💥 패배"}
-          </p>
-          <p className="text-sm">
-            최종 배팅 포인트: {toPoints(myResult.finalBetAmount).toLocaleString()}P
-          </p>
-          <p className={myResult.outcome === "WIN" ? "text-sm text-green-600" : "text-sm text-red-600"}>
-            {myResult.outcome === "WIN" ? "획득" : "차감"} 포인트:{" "}
-            {myResult.outcome === "WIN" ? "+" : "-"}
-            {Math.trunc(toPoints(myResult.finalBetAmount) * Number(round!.multiplier)).toLocaleString()}P
-          </p>
-        </div>
-      )}
-
-      {(!round || round.status === "WAITING") && (
-        <div className="flex flex-col items-center gap-2 rounded-xl border border-neutral-200 p-6 text-center dark:border-neutral-800">
-          <p className="text-neutral-500">라운드 시작을 기다리고 있어요.</p>
-          <p className="text-xs text-neutral-400">상대 팀: {opponent.name}</p>
-        </div>
-      )}
+          {(!round || round.status === "WAITING") && (
+            <div className="flex flex-col items-center gap-2 rounded-xl border border-neutral-200 p-6 text-center dark:border-neutral-800">
+              <p className="text-neutral-500">라운드 시작을 기다리고 있어요.</p>
+              <p className="text-xs text-neutral-400">상대 팀: {opponent.name}</p>
+            </div>
+          )}
         </>
       )}
     </main>

@@ -16,36 +16,12 @@ enum RoomStatus {
   @@schema("betting")
 }
 
-enum RevealMode {
-  PUBLIC
-  TARGET_ONLY
-  ANNOUNCE_ONLY
-  SECRET
-
-  @@schema("betting")
-}
-
 enum RoundStatus {
   WAITING
   BETTING
   LOCKED
   RESULT_PENDING
   RESOLVED
-
-  @@schema("betting")
-}
-
-enum BetType {
-  NORMAL
-  FORCED_EXTRA
-
-  @@schema("betting")
-}
-
-enum ExtraBetStatus {
-  PENDING
-  SUBMITTED
-  CANCELLED
 
   @@schema("betting")
 }
@@ -58,23 +34,10 @@ enum Outcome {
   @@schema("betting")
 }
 
+// 이벤트는 두 종류뿐이며 둘 다 항상 양 팀 대상 + 전체 공개다.
 enum EventType {
-  GIVE_POINTS
-  DEDUCT_POINTS
-  TRANSFER_POINTS
   SWAP_ALL
   BET_MULTIPLIER
-  FORCED_EXTRA_BET
-  ASSIGNED_EXTRA_BET
-
-  @@schema("betting")
-}
-
-enum TargetScope {
-  TEAM1
-  TEAM2
-  BOTH
-  NONE
 
   @@schema("betting")
 }
@@ -89,40 +52,38 @@ enum ScoreSourceType {
 }
 
 model Room {
-  id                 String     @id @default(cuid())
-  code               String     @unique
-  adminToken         String     @unique
-  status             RoomStatus @default(SETUP)
-  team1Name          String     @default("1팀")
-  team2Name          String     @default("2팀")
-  startPoints        BigInt     @default(500)
-  negativeBetLimit   BigInt     @default(500)
-  currentRound       Int        @default(1)
-  soundEnabled       Boolean    @default(true)
-  vibrationEnabled   Boolean    @default(true)
-  spectatorEnabled   Boolean    @default(false)
-  eventRevealDefault RevealMode @default(PUBLIC)
-  createdAt          DateTime   @default(now())
+  id               String     @id @default(cuid())
+  code             String     @unique
+  adminToken       String     @unique
+  status           RoomStatus @default(SETUP)
+  team1Name        String     @default("1팀")
+  team2Name        String     @default("2팀")
+  startPoints      BigInt     @default(500)
+  negativeBetLimit BigInt     @default(500)
+  currentRound     Int        @default(1)
+  soundEnabled     Boolean    @default(true)
+  vibrationEnabled Boolean    @default(true)
+  spectatorEnabled Boolean    @default(false)
+  createdAt        DateTime   @default(now())
 
-  teams  Team[]
-  rounds Round[]
-  events EventLog[]
+  teams             Team[]
+  rounds            Round[]
+  events            EventLog[]
   scoreTransactions ScoreTransaction[]
 
   @@schema("betting")
 }
 
 model Team {
-  id                  String    @id @default(cuid())
-  roomId              String
-  room                Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  teamNo              Int
-  name                String
-  accessToken          String
-  currentPoints       BigInt    @default(0)
+  id            String @id @default(cuid())
+  roomId        String
+  room          Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  teamNo        Int
+  name          String
+  accessToken   String
+  currentPoints BigInt @default(0)
 
   bets              Bet[]
-  extraBetRequests  ExtraBetRequest[]
   roundResults      RoundResult[]
   scoreTransactions ScoreTransaction[]
 
@@ -132,16 +93,15 @@ model Team {
 }
 
 model Round {
-  id            String      @id @default(cuid())
-  roomId        String
-  room          Room        @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  roundNo       Int
-  status        RoundStatus @default(WAITING)
-  multiplier    Decimal     @default(1) @db.Decimal(10, 4)
-  createdAt     DateTime    @default(now())
+  id         String      @id @default(cuid())
+  roomId     String
+  room       Room        @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roundNo    Int
+  status     RoundStatus @default(WAITING)
+  multiplier Decimal     @default(1) @db.Decimal(10, 4)
+  createdAt  DateTime    @default(now())
 
   bets              Bet[]
-  extraBetRequests  ExtraBetRequest[]
   roundResults      RoundResult[]
   events            EventLog[]
   scoreTransactions ScoreTransaction[]
@@ -151,68 +111,48 @@ model Round {
 }
 
 model Bet {
-  id           String    @id @default(cuid())
-  roundId      String
-  round        Round     @relation(fields: [roundId], references: [id], onDelete: Cascade)
-  teamId       String
-  team         Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  betType      BetType   @default(NORMAL)
-  amount       BigInt
-  confirmed    Boolean   @default(false)
-  confirmedAt  DateTime?
-  createdAt    DateTime  @default(now())
-
-  @@unique([roundId, teamId, betType])
-  @@schema("betting")
-}
-
-model ExtraBetRequest {
-  id         String         @id @default(cuid())
-  roundId    String
-  round      Round          @relation(fields: [roundId], references: [id], onDelete: Cascade)
-  teamId     String
-  team       Team           @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  minAmount  BigInt         @default(0)
-  maxAmount  BigInt?
-  reason     String?
-  status     ExtraBetStatus @default(PENDING)
-  createdAt  DateTime       @default(now())
+  id          String    @id @default(cuid())
+  roundId     String
+  round       Round     @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  teamId      String
+  team        Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  amount      BigInt
+  confirmed   Boolean   @default(false)
+  confirmedAt DateTime?
+  createdAt   DateTime  @default(now())
 
   @@unique([roundId, teamId])
   @@schema("betting")
 }
 
 model RoundResult {
-  id               String    @id @default(cuid())
-  roundId          String
-  round            Round     @relation(fields: [roundId], references: [id], onDelete: Cascade)
-  teamId           String
-  team             Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  outcome          Outcome   @default(PENDING)
-  finalBetAmount   BigInt    @default(0)
-  applied          Boolean   @default(false)
-  appliedAt        DateTime?
-  reverted         Boolean   @default(false)
-  revertedAt       DateTime?
+  id             String    @id @default(cuid())
+  roundId        String
+  round          Round     @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  teamId         String
+  team           Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  outcome        Outcome   @default(PENDING)
+  finalBetAmount BigInt    @default(0)
+  applied        Boolean   @default(false)
+  appliedAt      DateTime?
+  reverted       Boolean   @default(false)
+  revertedAt     DateTime?
 
   @@unique([roundId, teamId])
   @@schema("betting")
 }
 
 model EventLog {
-  id           String      @id @default(cuid())
-  roomId       String
-  room         Room        @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  roundId      String?
-  round        Round?      @relation(fields: [roundId], references: [id], onDelete: SetNull)
-  eventType    EventType
-  targetScope  TargetScope
-  revealMode   RevealMode
-  params       Json        @default("{}")
-  memo         String?
-  executedAt   DateTime    @default(now())
-  reverted     Boolean     @default(false)
-  revertedAt   DateTime?
+  id         String    @id @default(cuid())
+  roomId     String
+  room       Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roundId    String?
+  round      Round?    @relation(fields: [roundId], references: [id], onDelete: SetNull)
+  eventType  EventType
+  params     Json      @default("{}")
+  executedAt DateTime  @default(now())
+  reverted   Boolean   @default(false)
+  revertedAt DateTime?
 
   scoreTransactions ScoreTransaction[]
 
@@ -220,22 +160,22 @@ model EventLog {
 }
 
 model ScoreTransaction {
-  id            String          @id @default(cuid())
-  roomId        String
-  room          Room            @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  roundId       String?
-  round         Round?          @relation(fields: [roundId], references: [id], onDelete: SetNull)
-  teamId        String
-  team          Team            @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  sourceType    ScoreSourceType
-  sourceId      String?
-  eventLogId    String?
-  eventLog      EventLog?       @relation(fields: [eventLogId], references: [id], onDelete: SetNull)
-  pointsBefore  BigInt
-  pointsDelta   BigInt
-  pointsAfter   BigInt
-  memo          String?
-  createdAt     DateTime        @default(now())
+  id           String          @id @default(cuid())
+  roomId       String
+  room         Room            @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roundId      String?
+  round        Round?          @relation(fields: [roundId], references: [id], onDelete: SetNull)
+  teamId       String
+  team         Team            @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  sourceType   ScoreSourceType
+  sourceId     String?
+  eventLogId   String?
+  eventLog     EventLog?       @relation(fields: [eventLogId], references: [id], onDelete: SetNull)
+  pointsBefore BigInt
+  pointsDelta  BigInt
+  pointsAfter  BigInt
+  memo         String?
+  createdAt    DateTime        @default(now())
 
   @@index([roomId, teamId, createdAt])
   @@schema("betting")

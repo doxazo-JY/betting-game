@@ -41,10 +41,8 @@ export async function applyScoreDelta(
 }
 
 export async function computeFinalBetAmount(roundId: string, teamId: string): Promise<bigint> {
-  const bets = await prisma.bet.findMany({
-    where: { roundId, teamId, confirmed: true },
-  });
-  return bets.reduce((sum, b) => sum + b.amount, BigInt(0));
+  const bet = await prisma.bet.findUnique({ where: { roundId_teamId: { roundId, teamId } } });
+  return bet?.confirmed ? bet.amount : BigInt(0);
 }
 
 // 소수점은 0을 향해 버림 처리 (trunc)
