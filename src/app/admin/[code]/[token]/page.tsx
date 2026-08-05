@@ -11,6 +11,7 @@ import GameFlowPanel from "./GameFlowPanel";
 import GameControls from "./GameControls";
 import PollRefresh from "@/components/PollRefresh";
 import FinalRanking from "@/components/FinalRanking";
+import RegisterRecentGame from "./RegisterRecentGame";
 
 export default async function AdminPage({
   params,
@@ -43,6 +44,12 @@ export default async function AdminPage({
   return (
     <main className="mx-auto flex min-h-dvh max-w-2xl flex-col gap-6 px-6 py-10">
       <PollRefresh />
+      <RegisterRecentGame
+        code={room.code}
+        adminToken={room.adminToken}
+        team1Name={room.teams[0].name}
+        team2Name={room.teams[1].name}
+      />
       <header className="flex items-start justify-between gap-1">
         <div>
           <h1 className="text-2xl font-bold">진행자 화면</h1>
@@ -136,6 +143,7 @@ export default async function AdminPage({
               label: t.name,
               url: `${origin}/play/${room.code}/${t.accessToken}`,
             })),
+            { label: "중계 화면 (TV용)", url: `${origin}/watch/${room.code}` },
             { label: "진행자 화면 (본인용 북마크)", url: `${origin}/admin/${room.code}/${room.adminToken}` },
           ]}
         />
