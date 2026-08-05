@@ -36,6 +36,7 @@ export default async function PlayPage({
     notFound();
   }
   const opponent = room.teams.find((t) => t.id !== me.id)!;
+  const isRed = me.teamNo === 1;
 
   const round = await prisma.round.findUnique({
     where: { roomId_roundNo: { roomId: room.id, roundNo: room.currentRound } },
@@ -76,21 +77,33 @@ export default async function PlayPage({
     me.currentPoints > BigInt(0) ? toPoints(me.currentPoints) : toPoints(room.negativeBetLimit);
 
   function calcResultAmount(result: { outcome: string; finalBetAmount: bigint }) {
-    return result.outcome === "WIN"
-      ? Math.trunc(toPoints(result.finalBetAmount) * Number(round!.multiplier))
-      : toPoints(result.finalBetAmount);
+    return Math.trunc(toPoints(result.finalBetAmount) * Number(round!.multiplier));
   }
 
   const resultAmount = myResult ? calcResultAmount(myResult) : 0;
+  const myPoints = toPoints(me.currentPoints);
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col gap-6 px-6 py-10">
+    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 px-5 py-8">
       <PollRefresh />
-      <header className="text-center">
-        <p className="text-lg font-bold">{me.name}</p>
-        <p className="mt-4 text-sm text-neutral-500">현재 보유 포인트</p>
-        <p className="text-5xl font-extrabold tabular-nums tracking-tight">
-          {toPoints(me.currentPoints).toLocaleString()}P
+
+      <header className="flex flex-col items-center gap-3">
+        <span
+          className={
+            "inline-flex items-center gap-2 border-2 border-ink px-4 py-1.5 text-sm font-black text-white " +
+            (isRed ? "bg-team-red" : "bg-team-blue")
+          }
+        >
+          {me.name}
+        </span>
+        <p className="text-sm font-bold text-ink-soft">현재 보유 포인트</p>
+        <p
+          className={
+            "text-5xl font-black tabular-nums tracking-tight " +
+            (myPoints < 0 ? "text-lose-ink" : "text-ink")
+          }
+        >
+          {myPoints.toLocaleString()}P
         </p>
       </header>
 
@@ -114,7 +127,9 @@ export default async function PlayPage({
         </>
       ) : (
         <>
-          <p className="text-center text-neutral-500">ROUND {room.currentRound}</p>
+          <div className="mx-auto inline-flex items-center gap-2 border-2 border-ink bg-win px-4 py-1.5 text-xs font-black tracking-wide text-ink">
+            ★ ROUND {room.currentRound}
+          </div>
 
           <EventPopup event={visibleEvent} />
 
@@ -123,54 +138,81 @@ export default async function PlayPage({
           )}
 
           {round?.status === "BETTING" && !myBet?.confirmed && (
-            <BetForm roomCode={room.code} teamToken={me.accessToken} maxBet={maxBet} />
+            <BetForm
+              roomCode={room.code}
+              teamToken={me.accessToken}
+              maxBet={maxBet}
+              teamColor={isRed ? "red" : "blue"}
+            />
           )}
 
           {round?.status === "BETTING" && myBet?.confirmed && (
-            <div className="flex flex-col items-center gap-2 rounded-xl border border-green-300 p-6 text-center dark:border-green-800">
-              <p className="text-xl font-bold">✅ 배팅 완료</p>
+            <div className="flex flex-col items-center gap-3 border-[3px] border-ink bg-paper-2 p-7 text-center shadow-sticker">
+              <div className="flex gap-1.5">
+                <span className="wait-dot h-2.5 w-2.5 rounded-full bg-ink" />
+                <span className="wait-dot h-2.5 w-2.5 rounded-full bg-ink" />
+                <span className="wait-dot h-2.5 w-2.5 rounded-full bg-ink" />
+              </div>
+              <p className="text-lg font-black">배팅 완료!</p>
               {opponentBet?.confirmed ? (
-                <p className="text-sm text-neutral-500">
-                  🎮 게임이 진행되고 있어요! 결과에 따라 포인트를 얻거나 잃어요.
+                <p className="text-sm font-semibold text-ink-soft">
+                  두 팀 다 배팅을 마쳤어요. 곧 결과가 발표됩니다.
                 </p>
               ) : (
-                <p className="text-sm text-neutral-500">상대 팀 배팅을 기다리는 중이에요.</p>
+                <p className="text-sm font-semibold text-ink-soft">
+                  {opponent.name}의 배팅을 기다리고 있어요
+                </p>
               )}
-              <p className="mt-2 text-xs text-neutral-400">
-                상대 팀: {opponentBet?.confirmed ? "배팅 완료" : "배팅 대기 중"}
-              </p>
             </div>
           )}
 
           {myResult && (
-            <div
-              className={
-                myResult.outcome === "WIN"
-                  ? "flex flex-col items-center gap-2 rounded-xl border border-green-400 bg-green-50 p-6 text-center dark:border-green-700 dark:bg-green-950"
-                  : "flex flex-col items-center gap-2 rounded-xl border border-red-400 bg-red-50 p-6 text-center dark:border-red-700 dark:bg-red-950"
-              }
-            >
-              <p className="text-2xl font-extrabold">
-                {myResult.outcome === "WIN" ? "🏆 승리!" : "💥 패배"}
+            <div className="animate-pop-in flex flex-col items-center gap-2 border-[3px] border-ink bg-paper-2 p-7 text-center shadow-sticker">
+              <span
+                className={
+                  "border-2 border-ink px-4 py-1 text-xs font-black tracking-wide " +
+                  (myResult.outcome === "WIN" ? "bg-win text-ink" : "bg-lose-tint text-lose-ink")
+                }
+              >
+                {myResult.outcome === "WIN" ? "WIN!" : "GAME OVER"}
+              </span>
+              <p
+                className={
+                  "text-3xl font-black " +
+                  (myResult.outcome === "WIN" ? "text-win-ink" : "text-lose-ink")
+                }
+              >
+                {myResult.outcome === "WIN" ? "승리!" : "패배…"}
               </p>
-              <p className="text-sm">
-                최종 배팅 포인트: {toPoints(myResult.finalBetAmount).toLocaleString()}P
-              </p>
-              <p className={myResult.outcome === "WIN" ? "text-sm text-green-600" : "text-sm text-red-600"}>
-                {myResult.outcome === "WIN" ? "획득" : "차감"} 포인트:{" "}
+              <p
+                className={
+                  "border-2 border-ink px-4 py-1 text-xl font-black tabular-nums " +
+                  (myResult.outcome === "WIN"
+                    ? "bg-win-tint text-win-ink"
+                    : "bg-lose-tint text-lose-ink")
+                }
+              >
                 {myResult.outcome === "WIN" ? "+" : "-"}
                 {resultAmount.toLocaleString()}P
+              </p>
+              <p className="mt-1 text-xs font-bold text-ink-faint">
+                현재 {myPoints.toLocaleString()}P
               </p>
             </div>
           )}
 
           {opponentResult && (
-            <div className="flex flex-col items-center gap-1 rounded-xl border border-neutral-200 p-4 text-center text-sm dark:border-neutral-800">
-              <p className="font-medium text-neutral-500">{opponent.name} 결과</p>
-              <p>
+            <div className="flex flex-col items-center gap-1 border-2 border-line bg-paper-2 p-4 text-center text-sm">
+              <p className="font-bold text-ink-soft">{opponent.name} 결과</p>
+              <p className="font-semibold">
                 {toPoints(opponentResult.finalBetAmount).toLocaleString()}P 배팅 ·{" "}
                 {opponentResult.outcome === "WIN" ? "승리" : "패배"}{" "}
-                <span className={opponentResult.outcome === "WIN" ? "text-green-600" : "text-red-600"}>
+                <span
+                  className={
+                    "font-black " +
+                    (opponentResult.outcome === "WIN" ? "text-win-ink" : "text-lose-ink")
+                  }
+                >
                   ({opponentResult.outcome === "WIN" ? "+" : "-"}
                   {calcResultAmount(opponentResult).toLocaleString()}P)
                 </span>
@@ -179,9 +221,9 @@ export default async function PlayPage({
           )}
 
           {(!round || round.status === "WAITING") && (
-            <div className="flex flex-col items-center gap-2 rounded-xl border border-neutral-200 p-6 text-center dark:border-neutral-800">
-              <p className="text-neutral-500">라운드 시작을 기다리고 있어요.</p>
-              <p className="text-xs text-neutral-400">상대 팀: {opponent.name}</p>
+            <div className="flex flex-col items-center gap-2 border-2 border-dashed border-ink-faint p-6 text-center">
+              <p className="font-bold text-ink-soft">라운드 시작을 기다리고 있어요</p>
+              <p className="text-xs font-semibold text-ink-faint">상대 팀: {opponent.name}</p>
             </div>
           )}
         </>

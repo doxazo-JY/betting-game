@@ -1,26 +1,216 @@
 @import "tailwindcss";
 
+/*
+  v3 — 수련회 PPT("2026 인투 오락실")의 8비트 오락실 톤에 맞춘 팔레트.
+  다크모드는 쓰지 않는다(카지노/스포츠토토 연상을 피하려는 결정, v2에서 확정).
+  팀 컬러는 PPT에 없어 새로 정함: 1팀=레드, 2팀=블루(고전 2P 대전 관례).
+  승리=골드(코인/별), 패배=차분한 슬레이트(팀 컬러와 안 겹치는 "게임오버" 톤),
+  이벤트=바이올렛. 모서리는 전부 각지게(둥근 모서리 없음), 그림자는 블러 없는
+  계단식(하드 오프셋)으로 "픽셀" 질감을 낸다.
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --sky-top: #5fb8ec;
+  --sky-bot: #cdeefb;
+  --grass: #4caf50;
+  --grass-dk: #2e7d32;
+  --dirt: #8d5a3b;
+  --dirt-dk: #6b4226;
+
+  --ink: #1a1a1a;
+  --ink-soft: #4d4d55;
+  --ink-faint: #8a8a92;
+  --line: #ddd6c4;
+
+  --paper: #fff9ec;
+  --paper-2: #ffffff;
+
+  --team-red: #e6483d;
+  --team-red-ink: #a52a20;
+  --team-red-tint: #ffe3e0;
+
+  --team-blue: #2f7fd1;
+  --team-blue-ink: #1c4f8c;
+  --team-blue-tint: #e2f0ff;
+
+  --win: #ffcf3d;
+  --win-ink: #c98f00;
+  --win-tint: #fff6dc;
+
+  --lose: #8b95a1;
+  --lose-ink: #545c66;
+  --lose-tint: #eceff2;
+
+  --event: #8b5cf6;
+  --event-ink: #5b21b6;
+  --event-tint: #efe6ff;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-line: var(--line);
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-team-red: var(--team-red);
+  --color-team-red-ink: var(--team-red-ink);
+  --color-team-red-tint: var(--team-red-tint);
+
+  --color-team-blue: var(--team-blue);
+  --color-team-blue-ink: var(--team-blue-ink);
+  --color-team-blue-tint: var(--team-blue-tint);
+
+  --color-win: var(--win);
+  --color-win-ink: var(--win-ink);
+  --color-win-tint: var(--win-tint);
+
+  --color-lose: var(--lose);
+  --color-lose-ink: var(--lose-ink);
+  --color-lose-tint: var(--lose-tint);
+
+  --color-event: var(--event);
+  --color-event-ink: var(--event-ink);
+  --color-event-tint: var(--event-tint);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100dvh;
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bot) 55%, var(--sky-bot) 100%);
+  color: var(--ink);
+  font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui,
+    sans-serif;
+}
+
+.font-pixel {
+  font-family: ui-monospace, "SFMono-Regular", "Courier New", monospace;
+}
+
+/* 큰 타이틀/숫자에 쓰는 픽셀 외곽선 흉내 — 실제 비트맵 폰트 대신
+   text-shadow로 계단식 외곽선을 낸다 (한글 지원되는 픽셀 폰트가 마땅치 않음). */
+.pixel-outline {
+  -webkit-text-stroke: 1.5px var(--ink);
+  text-shadow:
+    -2px -2px 0 var(--ink),
+    2px -2px 0 var(--ink),
+    -2px 2px 0 var(--ink),
+    2px 2px 0 var(--ink);
+}
+
+/* 화면 전체에 깔리는 세계관 배경 — 장식이 아니라 모든 화면의 실제 배경.
+   뷰포트 바닥에 고정해서 스크롤해도 항상 "이 세계 위에 서 있는" 느낌을 유지한다. */
+.world-ground {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 30px;
+  z-index: 0;
+  border-top: 3px solid var(--ink);
+  background: repeating-linear-gradient(90deg, var(--grass) 0 16px, var(--grass-dk) 16px 20px);
+}
+.world-ground::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 18px;
+  bottom: -9999px;
+  background: repeating-linear-gradient(90deg, var(--dirt) 0 16px, var(--dirt-dk) 16px 20px);
+}
+
+.world-stars {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.world-stars span {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+}
+.world-stars span:nth-child(1) {
+  top: 8%;
+  left: 10%;
+  box-shadow:
+    4px 0 0 #fff,
+    8px 0 0 #fff,
+    0 4px 0 #fff,
+    4px 4px 0 #fff,
+    8px 4px 0 #fff,
+    4px -4px 0 #fff,
+    -4px 4px 0 #fff,
+    12px 4px 0 #fff;
+  opacity: 0.8;
+}
+.world-stars span:nth-child(2) {
+  top: 14%;
+  right: 12%;
+  box-shadow:
+    4px 0 0 var(--win),
+    8px 0 0 var(--win),
+    0 4px 0 var(--win),
+    4px 4px 0 var(--win),
+    8px 4px 0 var(--win),
+    4px -4px 0 var(--win),
+    -4px 4px 0 var(--win),
+    12px 4px 0 var(--win);
+}
+.world-stars span:nth-child(3) {
+  top: 34%;
+  left: 4%;
+  box-shadow:
+    4px 0 0 #fff,
+    0 4px 0 #fff,
+    4px 4px 0 #fff,
+    8px 4px 0 #fff,
+    4px -4px 0 #fff;
+  opacity: 0.7;
+}
+
+/* 스티커/픽셀 패널 — 그라디언트·글로우 대신 두꺼운 잉크 테두리 +
+   블러 없는 오프셋 섀도, 모서리는 항상 각지게. */
+.shadow-sticker {
+  box-shadow: 6px 6px 0 var(--ink);
+}
+.shadow-sticker-sm {
+  box-shadow: 4px 4px 0 var(--ink);
+}
+
+@keyframes pulse-dot {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wait-dot {
+    animation: pulse-dot 1.2s ease-in-out infinite;
+  }
+  .wait-dot:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .wait-dot:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  .animate-pop-in {
+    animation: pop-in 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
 }

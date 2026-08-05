@@ -1,7 +1,10 @@
 export default function ActiveMultiplierBanner({ multiplier }: { multiplier: number }) {
   return (
-    <div className="rounded-xl border border-purple-200 bg-purple-50 px-4 py-3 text-center dark:border-purple-900 dark:bg-purple-950">
-      <p className="font-bold text-purple-700 dark:text-purple-300">🎲 배팅 배수 {multiplier}배 적용 중</p>
+    <div className="flex items-center justify-center gap-2 border-2 border-ink bg-event-tint px-4 py-3 text-center">
+      <span className="flex h-6 w-6 items-center justify-center border-2 border-ink bg-event text-xs font-black text-white">
+        ⚡
+      </span>
+      <p className="font-black text-event-ink">배팅 배수 {multiplier}배 적용 중</p>
     </div>
   );
 }

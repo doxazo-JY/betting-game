@@ -14,25 +14,29 @@ export default function FinalRanking({
   const ranking = computeRanking(team1Points, team2Points);
 
   return (
-    <div className="flex flex-col items-center gap-4 rounded-2xl border-2 border-yellow-400 bg-yellow-50 p-8 text-center dark:bg-yellow-950">
-      <p className="text-lg font-bold">🏁 게임 종료</p>
+    <div className="animate-pop-in flex flex-col items-center gap-4 border-[3px] border-ink bg-paper-2 p-8 text-center shadow-sticker">
+      <span className="border-2 border-ink bg-ink px-4 py-1 text-xs font-black tracking-wide text-paper-2">
+        GAME OVER
+      </span>
       {ranking.type === "winner" ? (
-        <>
-          <p className="text-3xl font-extrabold">
-            🏆 {ranking.winnerTeamNo === 1 ? team1Name : team2Name} 우승!
-          </p>
-        </>
+        <p className="text-3xl font-black">
+          🏆 {ranking.winnerTeamNo === 1 ? team1Name : team2Name} 우승!
+        </p>
       ) : (
-        <p className="text-3xl font-extrabold">🤝 공동 우승</p>
+        <p className="text-3xl font-black">🤝 공동 우승</p>
       )}
-      <div className="flex gap-8">
-        <div>
-          <p className="font-medium">{team1Name}</p>
-          <p className="text-2xl font-bold tabular-nums">{team1Points.toLocaleString()}P</p>
+      <div className="flex gap-4">
+        <div className="border-2 border-ink bg-team-red-tint px-5 py-3">
+          <p className="text-xs font-black text-team-red-ink">{team1Name}</p>
+          <p className="text-xl font-black tabular-nums text-team-red-ink">
+            {team1Points.toLocaleString()}P
+          </p>
         </div>
-        <div>
-          <p className="font-medium">{team2Name}</p>
-          <p className="text-2xl font-bold tabular-nums">{team2Points.toLocaleString()}P</p>
+        <div className="border-2 border-ink bg-team-blue-tint px-5 py-3">
+          <p className="text-xs font-black text-team-blue-ink">{team2Name}</p>
+          <p className="text-xl font-black tabular-nums text-team-blue-ink">
+            {team2Points.toLocaleString()}P
+          </p>
         </div>
       </div>
     </div>

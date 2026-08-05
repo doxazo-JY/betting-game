@@ -39,18 +39,24 @@ export default function ManualAdjustForm({
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-neutral-200 p-4 dark:border-neutral-800">
-      <p className="font-bold">점수 직접 수정</p>
+    <div className="flex flex-col gap-3 border-[3px] border-ink bg-paper-2 p-4 shadow-sticker-sm">
+      <p className="font-black">점수 직접 수정</p>
       <div className="flex gap-2">
         <button
           onClick={() => setTeamNo(1)}
-          className={`flex-1 rounded-lg py-2 text-sm font-medium ${teamNo === 1 ? "bg-neutral-800 text-white dark:bg-neutral-200 dark:text-black" : "border border-neutral-300 dark:border-neutral-700"}`}
+          className={
+            "flex-1 border-2 border-ink py-2 text-sm font-bold " +
+            (teamNo === 1 ? "bg-team-red text-white" : "bg-paper-2")
+          }
         >
           {team1Name}
         </button>
         <button
           onClick={() => setTeamNo(2)}
-          className={`flex-1 rounded-lg py-2 text-sm font-medium ${teamNo === 2 ? "bg-neutral-800 text-white dark:bg-neutral-200 dark:text-black" : "border border-neutral-300 dark:border-neutral-700"}`}
+          className={
+            "flex-1 border-2 border-ink py-2 text-sm font-bold " +
+            (teamNo === 2 ? "bg-team-blue text-white" : "bg-paper-2")
+          }
         >
           {team2Name}
         </button>
@@ -58,13 +64,19 @@ export default function ManualAdjustForm({
       <div className="flex gap-2">
         <button
           onClick={() => setMode("delta")}
-          className={`flex-1 rounded-lg py-2 text-sm font-medium ${mode === "delta" ? "bg-neutral-800 text-white dark:bg-neutral-200 dark:text-black" : "border border-neutral-300 dark:border-neutral-700"}`}
+          className={
+            "flex-1 border-2 border-ink py-2 text-sm font-bold " +
+            (mode === "delta" ? "bg-ink text-paper-2" : "bg-paper-2")
+          }
         >
           +/- 만큼 조정
         </button>
         <button
           onClick={() => setMode("set")}
-          className={`flex-1 rounded-lg py-2 text-sm font-medium ${mode === "set" ? "bg-neutral-800 text-white dark:bg-neutral-200 dark:text-black" : "border border-neutral-300 dark:border-neutral-700"}`}
+          className={
+            "flex-1 border-2 border-ink py-2 text-sm font-bold " +
+            (mode === "set" ? "bg-ink text-paper-2" : "bg-paper-2")
+          }
         >
           특정 값으로 변경
         </button>
@@ -74,19 +86,19 @@ export default function ManualAdjustForm({
         onChange={(e) => setValue(e.target.value.replace(/(?!^-)[^0-9]/g, ""))}
         inputMode="numeric"
         placeholder={mode === "delta" ? "예: 100 또는 -100" : "예: -500"}
-        className="rounded-lg border border-neutral-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+        className="border-2 border-ink px-3 py-2"
       />
       <input
         value={memo}
         onChange={(e) => setMemo(e.target.value)}
         placeholder="메모 (선택)"
-        className="rounded-lg border border-neutral-300 px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+        className="border-2 border-ink px-3 py-2 text-sm"
       />
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm font-bold text-lose-ink">{error}</p>}
       <button
         disabled={!isValid || isPending}
         onClick={submit}
-        className="rounded-xl bg-neutral-800 py-3 font-bold text-white disabled:opacity-40 dark:bg-neutral-200 dark:text-black"
+        className="border-2 border-ink bg-ink py-3 font-black text-paper-2 shadow-sticker-sm disabled:opacity-40"
       >
         적용
       </button>

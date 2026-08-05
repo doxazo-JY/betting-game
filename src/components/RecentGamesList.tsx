@@ -19,15 +19,15 @@ export default function RecentGamesList() {
 
   return (
     <div className="flex w-full flex-col gap-2">
-      <p className="text-sm font-medium text-neutral-500">최근 게임방</p>
+      <p className="text-sm font-black text-ink-soft">최근 게임방</p>
       {games.map((g) => (
         <div key={g.code} className="flex items-center gap-2">
           <Link
             href={`/admin/${g.code}/${g.adminToken}`}
-            className="flex-1 rounded-lg border border-neutral-300 px-4 py-3 text-left dark:border-neutral-700"
+            className="flex-1 border-2 border-ink bg-paper-2 px-4 py-3 text-left"
           >
-            <span className="font-mono font-bold">{g.code}</span>
-            <span className="text-neutral-500">
+            <span className="font-mono font-black">{g.code}</span>
+            <span className="font-semibold text-ink-soft">
               {" "}
               · {g.team1Name} vs {g.team2Name}
             </span>
@@ -38,7 +38,7 @@ export default function RecentGamesList() {
               setCopiedCode(g.code);
               setTimeout(() => setCopiedCode((c) => (c === g.code ? null : c)), 1500);
             }}
-            className="rounded-lg border border-neutral-300 px-3 py-2 text-xs font-medium dark:border-neutral-700"
+            className="border-2 border-ink bg-paper-2 px-3 py-2 text-xs font-bold"
           >
             {copiedCode === g.code ? "복사됨" : "코드 복사"}
           </button>
@@ -47,7 +47,7 @@ export default function RecentGamesList() {
               removeRecentGame(g.code);
               setGames(getRecentGames());
             }}
-            className="px-2 text-xs text-neutral-400"
+            className="px-2 text-xs font-bold text-ink-faint"
           >
             삭제
           </button>

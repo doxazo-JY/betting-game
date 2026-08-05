@@ -28,11 +28,11 @@ export default function GameControls({
             }
           });
         }}
-        className="rounded-xl border-2 border-neutral-400 px-5 py-2 text-sm font-bold dark:border-neutral-600"
+        className="border-2 border-ink bg-paper-2 px-5 py-2 text-sm font-black"
       >
         게임 종료
       </button>
-      {error && <p className="text-xs text-red-600">{error}</p>}
+      {error && <p className="text-xs font-bold text-lose-ink">{error}</p>}
     </div>
   );
 }

@@ -45,11 +45,11 @@ export default async function WatchPage({
   const bothConfirmed = [team1, team2].every((t) => betByTeam.get(t.id)?.confirmed);
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-4xl flex-col items-center justify-center gap-10 px-6 py-10 text-center">
+    <main className="mx-auto flex min-h-dvh w-full max-w-4xl flex-col items-center justify-center gap-8 px-6 py-10 text-center">
       <PollRefresh intervalMs={2000} />
-      <div>
-        <p className="text-xl text-neutral-400">게임방 {room.code}</p>
-        <p className="text-3xl font-bold text-neutral-300">ROUND {room.currentRound}</p>
+      <div className="inline-flex items-center gap-3 border-2 border-ink bg-win px-5 py-2 text-ink">
+        <span className="font-mono text-sm font-black">{room.code}</span>
+        <span className="text-lg font-black">★ ROUND {room.currentRound}</span>
       </div>
 
       {room.status === "ENDED" ? (
@@ -68,28 +68,34 @@ export default async function WatchPage({
         </>
       ) : (
         <>
-          <div className="grid w-full grid-cols-2 gap-8">
+          <div className="grid w-full grid-cols-2 gap-6">
             {[team1, team2].map((team) => {
               const result = resultByTeam.get(team.id);
               const bet = betByTeam.get(team.id);
+              const isRed = team.teamNo === 1;
               return (
-                <div key={team.id} className="flex flex-col items-center gap-3">
-                  <p className="text-3xl font-bold">{team.name}</p>
-                  <p className="text-6xl font-extrabold tabular-nums">
+                <div
+                  key={team.id}
+                  className={
+                    "flex flex-col items-center gap-3 border-[3px] border-ink p-8 text-white shadow-sticker " +
+                    (isRed ? "bg-team-red" : "bg-team-blue")
+                  }
+                >
+                  <p className="text-2xl font-black">{team.name}</p>
+                  <p className="text-6xl font-black tabular-nums">
                     {toPoints(team.currentPoints).toLocaleString()}P
                   </p>
                   {result && (
                     <>
                       <p
                         className={
-                          result.outcome === "WIN"
-                            ? "text-2xl font-bold text-green-500"
-                            : "text-2xl font-bold text-red-500"
+                          "border-2 border-ink px-4 py-1 text-xl font-black " +
+                          (result.outcome === "WIN" ? "bg-win text-ink" : "bg-lose-tint text-lose-ink")
                         }
                       >
-                        {result.outcome === "WIN" ? "🏆 승리" : "💥 패배"}
+                        {result.outcome === "WIN" ? "WIN!" : "GAME OVER"}
                       </p>
-                      <p className="text-neutral-400">
+                      <p className="font-bold text-white/85">
                         {toPoints(result.finalBetAmount).toLocaleString()}P 배팅
                       </p>
                     </>
@@ -97,10 +103,10 @@ export default async function WatchPage({
                   {round?.status === "BETTING" && (
                     <p
                       className={
-                        bet?.confirmed ? "text-lg font-bold text-green-500" : "text-lg text-neutral-400"
+                        "text-lg font-black " + (bet?.confirmed ? "text-win" : "text-white/70")
                       }
                     >
-                      {bet?.confirmed ? "✅ 배팅 완료" : "⏳ 배팅 대기"}
+                      {bet?.confirmed ? "✓ 배팅 완료" : "⋯ 배팅 대기"}
                     </p>
                   )}
                 </div>
@@ -109,10 +115,10 @@ export default async function WatchPage({
           </div>
 
           {(!round || round.status === "WAITING") && (
-            <p className="text-xl text-neutral-400">라운드 시작을 기다리는 중...</p>
+            <p className="text-xl font-bold text-ink-soft">라운드 시작을 기다리는 중...</p>
           )}
           {round?.status === "BETTING" && bothConfirmed && (
-            <p className="text-xl font-bold text-blue-400">🎮 게임 진행 중</p>
+            <p className="text-xl font-black text-event-ink">⚡ 게임 진행 중</p>
           )}
 
           {activeMultiplierEvent && round && (

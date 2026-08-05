@@ -35,7 +35,8 @@ export async function getRoundHistory(
     if (!result || result.outcome === "PENDING") return null;
     const finalBet = toPoints(result.finalBetAmount);
     const outcome = result.outcome as "WIN" | "LOSE";
-    const delta = outcome === "WIN" ? Math.trunc(finalBet * multiplier) : -finalBet;
+    const magnitude = Math.trunc(finalBet * multiplier);
+    const delta = outcome === "WIN" ? magnitude : -magnitude;
     return { finalBet, outcome, delta };
   };
 

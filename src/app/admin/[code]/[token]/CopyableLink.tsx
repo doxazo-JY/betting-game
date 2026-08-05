@@ -7,13 +7,13 @@ export default function CopyableLink({ label, url }: { label: string; url: strin
 
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-xs font-medium text-neutral-500">{label}</span>
+      <span className="text-xs font-bold text-ink-soft">{label}</span>
       <div className="flex gap-2">
         <input
           readOnly
           value={url}
           onFocus={(e) => e.currentTarget.select()}
-          className="flex-1 truncate rounded-lg border border-neutral-300 bg-white px-3 py-2 text-xs dark:border-neutral-700 dark:bg-neutral-900"
+          className="flex-1 truncate border-2 border-ink bg-paper-2 px-3 py-2 text-xs"
         />
         <button
           onClick={async () => {
@@ -21,7 +21,7 @@ export default function CopyableLink({ label, url }: { label: string; url: strin
             setCopied(true);
             setTimeout(() => setCopied(false), 1500);
           }}
-          className="shrink-0 rounded-lg bg-neutral-800 px-3 py-2 text-xs font-bold text-white dark:bg-neutral-200 dark:text-black"
+          className="shrink-0 border-2 border-ink bg-ink px-3 py-2 text-xs font-black text-paper-2"
         >
           {copied ? "복사됨" : "복사"}
         </button>

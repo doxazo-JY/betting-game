@@ -36,7 +36,7 @@ export default function UndoButton({
       <button
         disabled={isPending}
         onClick={() => run(false)}
-        className="rounded-lg border border-red-300 px-3 py-1.5 text-xs font-medium text-red-600 disabled:opacity-50 dark:border-red-800"
+        className="border-2 border-red-600 px-3 py-1.5 text-xs font-bold text-red-600 disabled:opacity-50"
       >
         {label}
       </button>

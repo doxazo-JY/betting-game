@@ -26,9 +26,9 @@ export default function ResultForm({
   const [isPending, startTransition] = useTransition();
 
   function delta(isWinner: boolean, finalBet: number) {
-    // 배수는 승리 시에만 적용되고, 패배 시에는 배팅한 금액만 잃는다.
-    if (isWinner) return Math.trunc(finalBet * multiplier);
-    return -finalBet;
+    // 배수는 승패 양쪽에 동일하게 적용된다.
+    const magnitude = Math.trunc(finalBet * multiplier);
+    return isWinner ? magnitude : -magnitude;
   }
 
   function submit() {
@@ -48,18 +48,18 @@ export default function ResultForm({
     const d1 = delta(winner === 1, team1FinalBet);
     const d2 = delta(winner === 2, team2FinalBet);
     return (
-      <div className="flex flex-col gap-4 rounded-xl border border-blue-300 p-5 dark:border-blue-800">
-        <p className="font-bold">이 결과를 적용하시겠습니까?</p>
-        <p>
+      <div className="flex flex-col gap-4 border-[3px] border-ink bg-paper-2 p-5 shadow-sticker-sm">
+        <p className="font-black">이 결과를 적용하시겠습니까?</p>
+        <p className="font-semibold">
           {team1Name}: {winner === 1 ? "승리" : "패배"} /{" "}
-          <span className={d1 >= 0 ? "text-green-600" : "text-red-600"}>
+          <span className={"font-black " + (d1 >= 0 ? "text-win-ink" : "text-lose-ink")}>
             {d1 >= 0 ? "+" : ""}
             {d1.toLocaleString()}P
           </span>
         </p>
-        <p>
+        <p className="font-semibold">
           {team2Name}: {winner === 2 ? "승리" : "패배"} /{" "}
-          <span className={d2 >= 0 ? "text-green-600" : "text-red-600"}>
+          <span className={"font-black " + (d2 >= 0 ? "text-win-ink" : "text-lose-ink")}>
             {d2 >= 0 ? "+" : ""}
             {d2.toLocaleString()}P
           </span>
@@ -68,14 +68,14 @@ export default function ResultForm({
           <button
             disabled={isPending}
             onClick={() => setConfirming(false)}
-            className="flex-1 rounded-xl border-2 border-neutral-300 py-3 font-bold dark:border-neutral-700"
+            className="flex-1 border-2 border-ink bg-paper-2 py-3 font-black"
           >
             취소
           </button>
           <button
             disabled={isPending}
             onClick={submit}
-            className="flex-1 rounded-xl bg-blue-600 py-3 font-bold text-white disabled:opacity-50"
+            className="flex-1 border-2 border-ink bg-win py-3 font-black text-ink shadow-sticker-sm disabled:opacity-50"
           >
             결과 적용
           </button>
@@ -85,35 +85,33 @@ export default function ResultForm({
   }
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-neutral-200 p-5 dark:border-neutral-800">
-      <p className="font-bold">어느 팀이 승리했나요?</p>
+    <div className="flex flex-col gap-4 border-[3px] border-ink bg-paper-2 p-5 shadow-sticker-sm">
+      <p className="font-black">어느 팀이 승리했나요?</p>
       <div className="grid grid-cols-2 gap-3">
         <button
           onClick={() => setWinner(1)}
-          className={`rounded-xl py-4 font-bold ${
-            winner === 1
-              ? "bg-green-600 text-white"
-              : "border-2 border-neutral-300 dark:border-neutral-700"
-          }`}
+          className={
+            "border-2 border-ink py-4 font-black " +
+            (winner === 1 ? "bg-team-red text-white" : "bg-paper-2")
+          }
         >
           {team1Name} 승리
         </button>
         <button
           onClick={() => setWinner(2)}
-          className={`rounded-xl py-4 font-bold ${
-            winner === 2
-              ? "bg-green-600 text-white"
-              : "border-2 border-neutral-300 dark:border-neutral-700"
-          }`}
+          className={
+            "border-2 border-ink py-4 font-black " +
+            (winner === 2 ? "bg-team-blue text-white" : "bg-paper-2")
+          }
         >
           {team2Name} 승리
         </button>
       </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm font-bold text-lose-ink">{error}</p>}
       <button
         disabled={!winner}
         onClick={() => setConfirming(true)}
-        className="rounded-xl bg-blue-600 py-3 font-bold text-white disabled:opacity-40"
+        className="border-2 border-ink bg-win py-3 font-black text-ink shadow-sticker-sm disabled:opacity-40"
       >
         결과 적용
       </button>

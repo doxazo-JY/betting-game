@@ -34,29 +34,35 @@ export default function EventPopup({ event }: { event: EventViewProps | null }) 
   return (
     <>
       {showPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-6">
-          <div className="flex w-full max-w-sm flex-col items-center gap-3 rounded-2xl bg-white p-6 text-center dark:bg-neutral-900">
-            <p className="text-2xl font-extrabold">🚨 이벤트 발생!</p>
-            <p className="text-lg font-bold">{event.title}</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-6">
+          <div className="animate-pop-in flex w-full max-w-sm flex-col items-center gap-3 border-[3px] border-ink bg-paper-2 p-7 text-center shadow-sticker">
+            <span className="flex h-12 w-12 items-center justify-center border-2 border-ink bg-event text-2xl font-black text-white">
+              ⚡
+            </span>
+            <p className="text-lg font-black">{event.title}</p>
             {hasDelta ? (
               <>
-                <p className="text-sm text-neutral-500">
+                <p className="text-sm font-semibold text-ink-soft">
                   변경 전 보유 포인트: {event.myPointsBefore!.toLocaleString()}P
                 </p>
-                <p className={event.myDelta! >= 0 ? "text-green-600" : "text-red-600"}>
+                <p
+                  className={
+                    "font-black " + (event.myDelta! >= 0 ? "text-win-ink" : "text-lose-ink")
+                  }
+                >
                   점수 변화: {event.myDelta! >= 0 ? "+" : ""}
                   {event.myDelta!.toLocaleString()}P
                 </p>
-                <p className="text-xl font-extrabold">
+                <p className="text-xl font-black">
                   현재 보유 포인트: {event.myPointsAfter!.toLocaleString()}P
                 </p>
               </>
             ) : (
-              <p className="text-sm text-neutral-500">자세한 내용은 결과에 반영됩니다.</p>
+              <p className="text-sm font-semibold text-ink-soft">자세한 내용은 결과에 반영됩니다.</p>
             )}
             <button
               onClick={() => setShowPopup(false)}
-              className="mt-2 w-full rounded-xl bg-blue-600 py-3 font-bold text-white"
+              className="mt-2 w-full border-2 border-ink bg-event py-3 font-black text-white shadow-sticker-sm"
             >
               확인
             </button>

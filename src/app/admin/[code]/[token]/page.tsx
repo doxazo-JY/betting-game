@@ -52,7 +52,7 @@ export default async function AdminPage({
   const origin = `${protocol}://${host}`;
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-2xl flex-col gap-6 px-6 py-10">
+    <main className="mx-auto flex min-h-dvh w-full max-w-2xl flex-col gap-6 px-6 py-10">
       <PollRefresh />
       <RegisterRecentGame
         code={room.code}
@@ -62,17 +62,20 @@ export default async function AdminPage({
       />
       <header className="flex items-start justify-between gap-1">
         <div>
-          <h1 className="text-2xl font-bold">진행자 화면</h1>
-          <p className="text-neutral-500">
-            게임방 코드 <span className="font-mono font-bold">{room.code}</span> · ROUND{" "}
+          <h1 className="text-2xl font-black">진행자 화면</h1>
+          <p className="text-sm font-semibold text-ink-soft">
+            게임방 코드 <span className="font-mono font-bold text-ink">{room.code}</span> · ROUND{" "}
             {room.currentRound}
           </p>
         </div>
-        <div className="flex flex-col items-end gap-1">
-          <Link href="/" className="text-sm text-blue-600">
+        <div className="flex flex-col items-end gap-1 text-sm font-bold">
+          <Link href="/" className="text-team-blue-ink underline">
             홈으로
           </Link>
-          <Link href={`/admin/${room.code}/${room.adminToken}/history`} className="text-sm text-blue-600">
+          <Link
+            href={`/admin/${room.code}/${room.adminToken}/history`}
+            className="text-team-blue-ink underline"
+          >
             기록/되돌리기
           </Link>
         </div>
@@ -81,22 +84,26 @@ export default async function AdminPage({
       <section className="grid grid-cols-2 gap-4">
         {room.teams.map((team) => {
           const bet = betByTeam.get(team.id);
+          const isRed = team.teamNo === 1;
           return (
             <div
               key={team.id}
-              className="flex flex-col gap-2 rounded-xl border border-neutral-200 p-4 dark:border-neutral-800"
+              className={
+                "flex flex-col gap-2 border-[3px] border-ink bg-paper-2 p-4 shadow-sticker-sm " +
+                (isRed ? "border-t-8 border-t-team-red" : "border-t-8 border-t-team-blue")
+              }
             >
-              <span className="font-bold">{team.name}</span>
-              <p className="text-2xl font-extrabold tabular-nums">
+              <span className="font-black">{team.name}</span>
+              <p className="text-2xl font-black tabular-nums">
                 {toPoints(team.currentPoints).toLocaleString()}P
               </p>
               {round && round.status !== "WAITING" && (
-                <p className="text-sm">
+                <p className="text-sm font-semibold">
                   배팅:{" "}
                   {bet?.confirmed ? (
-                    <span className="font-bold">{toPoints(bet.amount).toLocaleString()}P</span>
+                    <span className="font-black">{toPoints(bet.amount).toLocaleString()}P</span>
                   ) : (
-                    <span className="text-neutral-400">대기 중</span>
+                    <span className="text-ink-faint">대기 중</span>
                   )}
                 </p>
               )}
@@ -106,9 +113,9 @@ export default async function AdminPage({
       </section>
 
       {activeMultiplierEvent && round && Number(round.multiplier) !== 1 && (
-        <div className="flex flex-col items-center gap-2 rounded-xl border border-purple-300 bg-purple-50 px-4 py-3 text-center dark:border-purple-800 dark:bg-purple-950">
-          <p className="font-bold text-purple-700 dark:text-purple-300">
-            🎲 배팅 배수 {Number(round.multiplier)}배 적용 중
+        <div className="flex flex-col items-center gap-2 border-2 border-ink bg-event-tint px-4 py-3 text-center">
+          <p className="font-black text-event-ink">
+            ⚡ 배팅 배수 {Number(round.multiplier)}배 적용 중
           </p>
           <UndoButton
             label="이 이벤트 취소"

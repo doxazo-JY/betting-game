@@ -14,19 +14,19 @@ export default function WatchEntryPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-6 px-6 py-10">
-      <h1 className="text-center text-2xl font-bold">중계 화면</h1>
+    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-6 px-6 py-10">
+      <h1 className="text-center text-2xl font-black">중계 화면</h1>
       <form onSubmit={submit} className="flex flex-col gap-4">
         <input
           value={code}
           onChange={(e) => setCode(e.target.value)}
           placeholder="게임방 코드"
           autoCapitalize="characters"
-          className="rounded-lg border border-neutral-300 px-4 py-3 text-center text-lg uppercase dark:border-neutral-700 dark:bg-neutral-900"
+          className="border-2 border-ink bg-paper-2 px-4 py-3 text-center text-lg font-bold uppercase"
         />
         <button
           type="submit"
-          className="rounded-xl bg-blue-600 py-4 text-lg font-bold text-white active:scale-[0.98]"
+          className="border-2 border-ink bg-team-red py-4 text-lg font-black text-white shadow-sticker-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
         >
           중계 화면 열기
         </button>
