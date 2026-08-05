@@ -16,6 +16,7 @@ import { getRoundHistory } from "@/lib/roundHistory";
 import RegisterRecentGame from "./RegisterRecentGame";
 import UndoButton from "./UndoButton";
 import { undoEvent } from "./undoActions";
+import { getActiveMultiplierEvent } from "@/lib/activeMultiplier";
 
 export default async function AdminPage({
   params,
@@ -40,16 +41,7 @@ export default async function AdminPage({
   const bets = round ? await prisma.bet.findMany({ where: { roundId: round.id } }) : [];
   const betByTeam = new Map(bets.map((b) => [b.teamId, b]));
 
-  // 배팅 배수는 이번 라운드 결과 계산에 계속 반영되는 "진행 중인 상태"라서
-  // 배너로 계속 보여준다. 점수 교환은 실행되는 순간 이미 끝난 일이라(점수에
-  // 바로 반영됨) 별도로 계속 표시할 필요가 없다.
-  const activeMultiplierEvent =
-    round?.status !== "RESOLVED"
-      ? await prisma.eventLog.findFirst({
-          where: { roomId: room.id, roundId: round?.id, eventType: "BET_MULTIPLIER", reverted: false },
-          orderBy: { executedAt: "desc" },
-        })
-      : null;
+  const activeMultiplierEvent = await getActiveMultiplierEvent(room.id, round?.id, round?.status);
 
   const headerList = await headers();
   const host = headerList.get("host");

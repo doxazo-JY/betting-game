@@ -1,11 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { toPoints } from "@/lib/points";
-import { EVENT_LABELS } from "@/lib/eventLabels";
 import PollRefresh from "@/components/PollRefresh";
 import FinalRanking from "@/components/FinalRanking";
 import RoundHistoryTable from "@/components/RoundHistoryTable";
 import { getRoundHistory } from "@/lib/roundHistory";
+import ActiveMultiplierBanner from "@/components/ActiveMultiplierBanner";
+import { getActiveMultiplierEvent } from "@/lib/activeMultiplier";
 
 export default async function WatchPage({
   params,
@@ -36,10 +37,7 @@ export default async function WatchPage({
   const bets = round ? await prisma.bet.findMany({ where: { roundId: round.id } }) : [];
   const betByTeam = new Map(bets.map((b) => [b.teamId, b]));
 
-  const latestEvent = await prisma.eventLog.findFirst({
-    where: { roomId: room.id, reverted: false },
-    orderBy: { executedAt: "desc" },
-  });
+  const activeMultiplierEvent = await getActiveMultiplierEvent(room.id, round?.id, round?.status);
 
   const bothConfirmed = [team1, team2].every((t) => betByTeam.get(t.id)?.confirmed);
 
@@ -109,10 +107,8 @@ export default async function WatchPage({
             <p className="text-xl font-bold text-blue-400">🎮 게임 진행 중</p>
           )}
 
-          {latestEvent && (
-            <div className="rounded-2xl border border-purple-300 bg-purple-50 px-8 py-4 text-xl font-bold text-purple-700 dark:border-purple-800 dark:bg-purple-950 dark:text-purple-300">
-              🚨 이벤트 발생: {EVENT_LABELS[latestEvent.eventType]}
-            </div>
+          {activeMultiplierEvent && round && (
+            <ActiveMultiplierBanner multiplier={Number(round.multiplier)} />
           )}
         </>
       )}

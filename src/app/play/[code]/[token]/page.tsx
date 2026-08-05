@@ -8,6 +8,8 @@ import PollRefresh from "@/components/PollRefresh";
 import FinalRanking from "@/components/FinalRanking";
 import RoundHistoryTable from "@/components/RoundHistoryTable";
 import { getRoundHistory } from "@/lib/roundHistory";
+import ActiveMultiplierBanner from "@/components/ActiveMultiplierBanner";
+import { getActiveMultiplierEvent } from "@/lib/activeMultiplier";
 
 export default async function PlayPage({
   params,
@@ -55,6 +57,7 @@ export default async function PlayPage({
       : null;
 
   const visibleEvent = await getVisibleEventForTeam(room.id, me);
+  const activeMultiplierEvent = await getActiveMultiplierEvent(room.id, round?.id, round?.status);
 
   const maxBet =
     me.currentPoints > BigInt(0) ? toPoints(me.currentPoints) : toPoints(room.negativeBetLimit);
@@ -99,6 +102,10 @@ export default async function PlayPage({
           <p className="text-center text-neutral-500">ROUND {room.currentRound}</p>
 
           <EventPopup event={visibleEvent} />
+
+          {activeMultiplierEvent && round && (
+            <ActiveMultiplierBanner multiplier={Number(round.multiplier)} />
+          )}
 
           {round?.status === "BETTING" && !myBet?.confirmed && (
             <BetForm roomCode={room.code} teamToken={me.accessToken} maxBet={maxBet} />

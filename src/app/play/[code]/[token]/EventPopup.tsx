@@ -63,20 +63,6 @@ export default function EventPopup({ event }: { event: EventViewProps | null }) 
           </div>
         </div>
       )}
-
-      <div className="rounded-xl border border-purple-200 bg-purple-50 p-3 text-sm dark:border-purple-900 dark:bg-purple-950">
-        <p className="font-medium text-purple-700 dark:text-purple-300">최근 이벤트</p>
-        <p>
-          🔥 {event.title}
-          {hasDelta && (
-            <span>
-              {" "}
-              ({event.myDelta! >= 0 ? "+" : ""}
-              {event.myDelta!.toLocaleString()}P)
-            </span>
-          )}
-        </p>
-      </div>
     </>
   );
 }
