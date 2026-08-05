@@ -13,6 +13,12 @@ export async function executeSwapAll(roomCode: string, adminToken: string) {
   const room = await assertAdmin(roomCode, adminToken);
   const round = await getCurrentRound(room.id, room.currentRound);
 
+  // 점수 교환은 라운드 진행(배팅)에 영향을 주는 이벤트가 아니라 그 순간 바로
+  // 점수가 바뀌는 이벤트라, 라운드가 진행 중일 때(배팅 중)는 실행할 수 없다.
+  if (round.status === "BETTING") {
+    throw new Error("배팅이 진행 중일 때는 점수 교환을 실행할 수 없습니다. 라운드 시작 전이나 결과가 나온 후에 실행해주세요");
+  }
+
   const teams = await prisma.team.findMany({ where: { roomId: room.id }, orderBy: { teamNo: "asc" } });
   const [team1, team2] = teams;
 

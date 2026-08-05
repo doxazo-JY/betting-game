@@ -6,6 +6,7 @@ import { getRecentGames, removeRecentGame, type RecentGame } from "@/lib/recentG
 
 export default function RecentGamesList() {
   const [games, setGames] = useState<RecentGame[]>([]);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   useEffect(() => {
     // localStorage는 서버에 없는 값이라, 첫 렌더는 서버와 동일하게 빈 목록으로
@@ -31,6 +32,16 @@ export default function RecentGamesList() {
               · {g.team1Name} vs {g.team2Name}
             </span>
           </Link>
+          <button
+            onClick={async () => {
+              await navigator.clipboard.writeText(g.code);
+              setCopiedCode(g.code);
+              setTimeout(() => setCopiedCode((c) => (c === g.code ? null : c)), 1500);
+            }}
+            className="rounded-lg border border-neutral-300 px-3 py-2 text-xs font-medium dark:border-neutral-700"
+          >
+            {copiedCode === g.code ? "복사됨" : "코드 복사"}
+          </button>
           <button
             onClick={() => {
               removeRecentGame(g.code);

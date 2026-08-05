@@ -15,6 +15,8 @@ import FinalRanking from "@/components/FinalRanking";
 import RoundHistoryTable from "@/components/RoundHistoryTable";
 import { getRoundHistory } from "@/lib/roundHistory";
 import RegisterRecentGame from "./RegisterRecentGame";
+import UndoButton from "./UndoButton";
+import { undoEvent } from "./undoActions";
 
 export default async function AdminPage({
   params,
@@ -69,9 +71,14 @@ export default async function AdminPage({
             {room.currentRound}
           </p>
         </div>
-        <Link href={`/admin/${room.code}/${room.adminToken}/history`} className="text-sm text-blue-600">
-          기록/되돌리기
-        </Link>
+        <div className="flex flex-col items-end gap-1">
+          <Link href="/" className="text-sm text-blue-600">
+            홈으로
+          </Link>
+          <Link href={`/admin/${room.code}/${room.adminToken}/history`} className="text-sm text-blue-600">
+            기록/되돌리기
+          </Link>
+        </div>
       </header>
 
       <section className="grid grid-cols-2 gap-4">
@@ -102,7 +109,7 @@ export default async function AdminPage({
       </section>
 
       {(latestEvent || (round && Number(round.multiplier) !== 1)) && (
-        <div className="flex flex-col items-center gap-1 rounded-xl border border-purple-300 bg-purple-50 px-4 py-3 text-center dark:border-purple-800 dark:bg-purple-950">
+        <div className="flex flex-col items-center gap-2 rounded-xl border border-purple-300 bg-purple-50 px-4 py-3 text-center dark:border-purple-800 dark:bg-purple-950">
           {latestEvent && (
             <p className="font-bold text-purple-700 dark:text-purple-300">
               🎲 이번 라운드 이벤트: {EVENT_LABELS[latestEvent.eventType]}
@@ -112,6 +119,12 @@ export default async function AdminPage({
             <p className="text-sm text-purple-600 dark:text-purple-400">
               배팅 배수 {Number(round.multiplier)}배 적용 중
             </p>
+          )}
+          {latestEvent && (
+            <UndoButton
+              label="이 이벤트 취소"
+              onUndo={undoEvent.bind(null, room.code, room.adminToken, latestEvent.id)}
+            />
           )}
         </div>
       )}

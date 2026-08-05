@@ -6,6 +6,7 @@ import { EVENT_LABELS } from "@/lib/eventLabels";
 import { undoRoundResult, undoEvent, undoManualAdjust } from "../undoActions";
 import UndoButton from "../UndoButton";
 import ManualAdjustForm from "../ManualAdjustForm";
+import ResetButton from "../ResetButton";
 
 export default async function HistoryPage({
   params,
@@ -163,6 +164,10 @@ export default async function HistoryPage({
             </p>
           ))}
         </div>
+      </section>
+
+      <section className="flex justify-center border-t border-neutral-200 pt-6 dark:border-neutral-800">
+        <ResetButton roomCode={room.code} adminToken={room.adminToken} />
       </section>
     </main>
   );

@@ -9,6 +9,7 @@ type Picked = "SWAP_ALL" | "BET_MULTIPLIER" | null;
 export default function EventPanel({
   roomCode,
   adminToken,
+  roundStatus,
   team1Name,
   team2Name,
   team1Points,
@@ -17,6 +18,7 @@ export default function EventPanel({
 }: {
   roomCode: string;
   adminToken: string;
+  roundStatus: string;
   team1Name: string;
   team2Name: string;
   team1Points: number;
@@ -134,20 +136,31 @@ export default function EventPanel({
     );
   }
 
+  // 점수 교환은 라운드와 무관하게 즉시 바뀌는 이벤트라 배팅 중에는 막고,
+  // 배팅 배수는 이번 라운드 결과 계산에 반영되는 이벤트라 결과가 나온 뒤엔 막는다.
+  const canSwap = roundStatus !== "BETTING";
+  const canMultiplier = roundStatus !== "RESOLVED";
+
+  if (!canSwap && !canMultiplier) return null;
+
   return (
     <div className="flex gap-3">
-      <button
-        onClick={() => setPicked("SWAP_ALL")}
-        className="flex-1 rounded-xl border-2 border-purple-300 px-4 py-3 font-bold text-purple-600 dark:border-purple-800"
-      >
-        🔄 전체 점수 교환
-      </button>
-      <button
-        onClick={() => setPicked("BET_MULTIPLIER")}
-        className="flex-1 rounded-xl border-2 border-purple-300 px-4 py-3 font-bold text-purple-600 dark:border-purple-800"
-      >
-        🎲 배팅 배수
-      </button>
+      {canSwap && (
+        <button
+          onClick={() => setPicked("SWAP_ALL")}
+          className="flex-1 rounded-xl border-2 border-purple-300 px-4 py-3 font-bold text-purple-600 dark:border-purple-800"
+        >
+          🔄 전체 점수 교환
+        </button>
+      )}
+      {canMultiplier && (
+        <button
+          onClick={() => setPicked("BET_MULTIPLIER")}
+          className="flex-1 rounded-xl border-2 border-purple-300 px-4 py-3 font-bold text-purple-600 dark:border-purple-800"
+        >
+          🎲 배팅 배수
+        </button>
+      )}
     </div>
   );
 }

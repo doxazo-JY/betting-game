@@ -40,6 +40,7 @@ export default function GameFlowPanel({
         <EventPanel
           roomCode={roomCode}
           adminToken={adminToken}
+          roundStatus={roundStatus}
           team1Name={team1Name}
           team2Name={team2Name}
           team1Points={team1Points}
