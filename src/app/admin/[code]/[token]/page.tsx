@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { toPoints } from "@/lib/points";
 import { computeFinalBetAmount } from "@/lib/game";
+import { EVENT_LABELS } from "@/lib/eventLabels";
 import ResultForm from "./ResultForm";
 import NextRoundButton from "./NextRoundButton";
 import LinksPanel from "./LinksPanel";
@@ -35,6 +36,14 @@ export default async function AdminPage({
 
   const bets = round ? await prisma.bet.findMany({ where: { roundId: round.id } }) : [];
   const betByTeam = new Map(bets.map((b) => [b.teamId, b]));
+
+  const latestEvent =
+    round?.status !== "RESOLVED"
+      ? await prisma.eventLog.findFirst({
+          where: { roomId: room.id, roundId: round?.id, reverted: false },
+          orderBy: { executedAt: "desc" },
+        })
+      : null;
 
   const headerList = await headers();
   const host = headerList.get("host");
@@ -89,6 +98,21 @@ export default async function AdminPage({
           );
         })}
       </section>
+
+      {(latestEvent || (round && Number(round.multiplier) !== 1)) && (
+        <div className="flex flex-col items-center gap-1 rounded-xl border border-purple-300 bg-purple-50 px-4 py-3 text-center dark:border-purple-800 dark:bg-purple-950">
+          {latestEvent && (
+            <p className="font-bold text-purple-700 dark:text-purple-300">
+              🎲 이번 라운드 이벤트: {EVENT_LABELS[latestEvent.eventType]}
+            </p>
+          )}
+          {round && Number(round.multiplier) !== 1 && (
+            <p className="text-sm text-purple-600 dark:text-purple-400">
+              배팅 배수 {Number(round.multiplier)}배 적용 중
+            </p>
+          )}
+        </div>
+      )}
 
       {room.status === "ENDED" ? (
         <FinalRanking
