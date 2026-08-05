@@ -12,6 +12,8 @@ import GameFlowPanel from "./GameFlowPanel";
 import GameControls from "./GameControls";
 import PollRefresh from "@/components/PollRefresh";
 import FinalRanking from "@/components/FinalRanking";
+import RoundHistoryTable from "@/components/RoundHistoryTable";
+import { getRoundHistory } from "@/lib/roundHistory";
 import RegisterRecentGame from "./RegisterRecentGame";
 
 export default async function AdminPage({
@@ -115,12 +117,19 @@ export default async function AdminPage({
       )}
 
       {room.status === "ENDED" ? (
-        <FinalRanking
-          team1Name={room.teams[0].name}
-          team2Name={room.teams[1].name}
-          team1Points={toPoints(room.teams[0].currentPoints)}
-          team2Points={toPoints(room.teams[1].currentPoints)}
-        />
+        <>
+          <FinalRanking
+            team1Name={room.teams[0].name}
+            team2Name={room.teams[1].name}
+            team1Points={toPoints(room.teams[0].currentPoints)}
+            team2Points={toPoints(room.teams[1].currentPoints)}
+          />
+          <RoundHistoryTable
+            team1Name={room.teams[0].name}
+            team2Name={room.teams[1].name}
+            entries={await getRoundHistory(room.id, room.teams[0].id, room.teams[1].id)}
+          />
+        </>
       ) : (
         <>
           <section className="flex justify-center">

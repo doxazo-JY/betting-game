@@ -6,6 +6,8 @@ import BetForm from "./BetForm";
 import EventPopup from "./EventPopup";
 import PollRefresh from "@/components/PollRefresh";
 import FinalRanking from "@/components/FinalRanking";
+import RoundHistoryTable from "@/components/RoundHistoryTable";
+import { getRoundHistory } from "@/lib/roundHistory";
 
 export default async function PlayPage({
   params,
@@ -75,12 +77,23 @@ export default async function PlayPage({
       </header>
 
       {room.status === "ENDED" ? (
-        <FinalRanking
-          team1Name={room.teams.find((t) => t.teamNo === 1)!.name}
-          team2Name={room.teams.find((t) => t.teamNo === 2)!.name}
-          team1Points={toPoints(room.teams.find((t) => t.teamNo === 1)!.currentPoints)}
-          team2Points={toPoints(room.teams.find((t) => t.teamNo === 2)!.currentPoints)}
-        />
+        <>
+          <FinalRanking
+            team1Name={room.teams.find((t) => t.teamNo === 1)!.name}
+            team2Name={room.teams.find((t) => t.teamNo === 2)!.name}
+            team1Points={toPoints(room.teams.find((t) => t.teamNo === 1)!.currentPoints)}
+            team2Points={toPoints(room.teams.find((t) => t.teamNo === 2)!.currentPoints)}
+          />
+          <RoundHistoryTable
+            team1Name={room.teams.find((t) => t.teamNo === 1)!.name}
+            team2Name={room.teams.find((t) => t.teamNo === 2)!.name}
+            entries={await getRoundHistory(
+              room.id,
+              room.teams.find((t) => t.teamNo === 1)!.id,
+              room.teams.find((t) => t.teamNo === 2)!.id
+            )}
+          />
+        </>
       ) : (
         <>
           <p className="text-center text-neutral-500">ROUND {room.currentRound}</p>
@@ -94,7 +107,13 @@ export default async function PlayPage({
           {round?.status === "BETTING" && myBet?.confirmed && (
             <div className="flex flex-col items-center gap-2 rounded-xl border border-green-300 p-6 text-center dark:border-green-800">
               <p className="text-xl font-bold">✅ 배팅 완료</p>
-              <p className="text-sm text-neutral-500">결과가 입력될 때까지 기다려주세요.</p>
+              {opponentBet?.confirmed ? (
+                <p className="text-sm text-neutral-500">
+                  🎮 게임이 진행되고 있어요! 결과에 따라 포인트를 얻거나 잃어요.
+                </p>
+              ) : (
+                <p className="text-sm text-neutral-500">상대 팀 배팅을 기다리는 중이에요.</p>
+              )}
               <p className="mt-2 text-xs text-neutral-400">
                 상대 팀: {opponentBet?.confirmed ? "배팅 완료" : "배팅 대기 중"}
               </p>
