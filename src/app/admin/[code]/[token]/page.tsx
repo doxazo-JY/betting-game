@@ -4,7 +4,6 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { toPoints } from "@/lib/points";
 import { computeFinalBetAmount } from "@/lib/game";
-import { EVENT_LABELS } from "@/lib/eventLabels";
 import ResultForm from "./ResultForm";
 import NextRoundButton from "./NextRoundButton";
 import LinksPanel from "./LinksPanel";
@@ -41,10 +40,13 @@ export default async function AdminPage({
   const bets = round ? await prisma.bet.findMany({ where: { roundId: round.id } }) : [];
   const betByTeam = new Map(bets.map((b) => [b.teamId, b]));
 
-  const latestEvent =
+  // 배팅 배수는 이번 라운드 결과 계산에 계속 반영되는 "진행 중인 상태"라서
+  // 배너로 계속 보여준다. 점수 교환은 실행되는 순간 이미 끝난 일이라(점수에
+  // 바로 반영됨) 별도로 계속 표시할 필요가 없다.
+  const activeMultiplierEvent =
     round?.status !== "RESOLVED"
       ? await prisma.eventLog.findFirst({
-          where: { roomId: room.id, roundId: round?.id, reverted: false },
+          where: { roomId: room.id, roundId: round?.id, eventType: "BET_MULTIPLIER", reverted: false },
           orderBy: { executedAt: "desc" },
         })
       : null;
@@ -108,24 +110,15 @@ export default async function AdminPage({
         })}
       </section>
 
-      {(latestEvent || (round && Number(round.multiplier) !== 1)) && (
+      {activeMultiplierEvent && round && Number(round.multiplier) !== 1 && (
         <div className="flex flex-col items-center gap-2 rounded-xl border border-purple-300 bg-purple-50 px-4 py-3 text-center dark:border-purple-800 dark:bg-purple-950">
-          {latestEvent && (
-            <p className="font-bold text-purple-700 dark:text-purple-300">
-              🎲 이번 라운드 이벤트: {EVENT_LABELS[latestEvent.eventType]}
-            </p>
-          )}
-          {round && Number(round.multiplier) !== 1 && (
-            <p className="text-sm text-purple-600 dark:text-purple-400">
-              배팅 배수 {Number(round.multiplier)}배 적용 중
-            </p>
-          )}
-          {latestEvent && (
-            <UndoButton
-              label="이 이벤트 취소"
-              onUndo={undoEvent.bind(null, room.code, room.adminToken, latestEvent.id)}
-            />
-          )}
+          <p className="font-bold text-purple-700 dark:text-purple-300">
+            🎲 배팅 배수 {Number(round.multiplier)}배 적용 중
+          </p>
+          <UndoButton
+            label="이 이벤트 취소"
+            onUndo={undoEvent.bind(null, room.code, room.adminToken, activeMultiplierEvent.id)}
+          />
         </div>
       )}
 
