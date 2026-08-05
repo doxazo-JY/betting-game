@@ -136,31 +136,24 @@ export default function EventPanel({
     );
   }
 
-  // 점수 교환은 라운드와 무관하게 즉시 바뀌는 이벤트라 배팅 중에는 막고,
-  // 배팅 배수는 라운드 시작(배팅 개시) 전에만 설정할 수 있다.
-  const canSwap = roundStatus !== "BETTING";
-  const canMultiplier = roundStatus === "WAITING";
-
-  if (!canSwap && !canMultiplier) return null;
+  // 두 이벤트 모두 라운드 시작 전(WAITING)에만 실행할 수 있다. 상태에 따라
+  // 어떤 버튼이 보이고 안 보이는지 헷갈린다는 피드백으로 규칙을 통일함.
+  if (roundStatus !== "WAITING") return null;
 
   return (
     <div className="flex gap-3">
-      {canSwap && (
-        <button
-          onClick={() => setPicked("SWAP_ALL")}
-          className="flex-1 rounded-xl border-2 border-purple-300 px-4 py-3 font-bold text-purple-600 dark:border-purple-800"
-        >
-          🔄 전체 점수 교환
-        </button>
-      )}
-      {canMultiplier && (
-        <button
-          onClick={() => setPicked("BET_MULTIPLIER")}
-          className="flex-1 rounded-xl border-2 border-purple-300 px-4 py-3 font-bold text-purple-600 dark:border-purple-800"
-        >
-          🎲 배팅 배수
-        </button>
-      )}
+      <button
+        onClick={() => setPicked("SWAP_ALL")}
+        className="flex-1 rounded-xl border-2 border-purple-300 px-4 py-3 font-bold text-purple-600 dark:border-purple-800"
+      >
+        🔄 전체 점수 교환
+      </button>
+      <button
+        onClick={() => setPicked("BET_MULTIPLIER")}
+        className="flex-1 rounded-xl border-2 border-purple-300 px-4 py-3 font-bold text-purple-600 dark:border-purple-800"
+      >
+        🎲 배팅 배수
+      </button>
     </div>
   );
 }
