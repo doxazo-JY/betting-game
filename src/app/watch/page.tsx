@@ -96,15 +96,19 @@ export default async function WatchPage() {
                       </p>
                     </>
                   )}
-                  {round?.status === "BETTING" && (
-                    <p
-                      className={
-                        "text-lg font-black " + (bet?.confirmed ? "text-win" : "text-white/70")
-                      }
-                    >
-                      {bet?.confirmed ? "✓ 배팅 완료" : "⋯ 배팅 대기"}
-                    </p>
-                  )}
+                  {round?.status === "BETTING" &&
+                    (bet?.confirmed ? (
+                      <p className="text-lg font-black text-win">✓ 배팅 완료</p>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <div className="flex gap-1.5">
+                          <span className="wait-dot h-2.5 w-2.5 rounded-full bg-white/80" />
+                          <span className="wait-dot h-2.5 w-2.5 rounded-full bg-white/80" />
+                          <span className="wait-dot h-2.5 w-2.5 rounded-full bg-white/80" />
+                        </div>
+                        <p className="text-lg font-black text-white/70">배팅 대기</p>
+                      </div>
+                    ))}
                 </div>
               );
             })}
