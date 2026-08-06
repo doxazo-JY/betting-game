@@ -96,6 +96,16 @@ export async function applyRoundResult(
   refresh(roomCode, adminToken);
 }
 
+export async function setParticipantsLocked(
+  roomCode: string,
+  adminToken: string,
+  locked: boolean
+) {
+  const room = await assertAdmin(roomCode, adminToken);
+  await prisma.room.update({ where: { id: room.id }, data: { participantsLocked: locked } });
+  refresh(roomCode, adminToken);
+}
+
 export async function nextRound(roomCode: string, adminToken: string) {
   const room = await assertAdmin(roomCode, adminToken);
   const round = await getCurrentRound(room.id, room.currentRound);

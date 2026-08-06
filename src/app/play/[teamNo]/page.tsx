@@ -1,10 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { toPoints } from "@/lib/points";
 import { getVisibleEventForTeam } from "@/lib/events";
+import { getCurrentRoom } from "@/lib/currentRoom";
 import { notFound } from "next/navigation";
 import BetForm from "./BetForm";
 import EventPopup from "./EventPopup";
+import JoinForm from "./JoinForm";
 import PollRefresh from "@/components/PollRefresh";
+import BackLock from "@/components/BackLock";
+import RememberTeam from "@/components/RememberTeam";
 import FinalRanking from "@/components/FinalRanking";
 import RoundHistoryTable from "@/components/RoundHistoryTable";
 import { getRoundHistory } from "@/lib/roundHistory";
@@ -18,25 +22,32 @@ export const dynamic = "force-dynamic";
 export default async function PlayPage({
   params,
 }: {
-  params: Promise<{ code: string; token: string }>;
+  params: Promise<{ teamNo: string }>;
 }) {
-  const { code, token } = await params;
+  const { teamNo: teamNoParam } = await params;
+  const teamNo = teamNoParam === "1" ? 1 : teamNoParam === "2" ? 2 : null;
+  if (!teamNo) {
+    notFound();
+  }
 
-  const room = await prisma.room.findUnique({
-    where: { code },
-    include: { teams: true },
-  });
-
+  const room = await getCurrentRoom();
   if (!room) {
     notFound();
   }
 
-  const me = room.teams.find((t) => t.accessToken === token);
+  const me = room.teams.find((t) => t.teamNo === teamNo);
   if (!me) {
     notFound();
   }
   const opponent = room.teams.find((t) => t.id !== me.id)!;
   const isRed = me.teamNo === 1;
+
+  const defaultName = teamNo === 1 ? "1팀" : "2팀";
+  if (me.name === defaultName) {
+    return (
+      <JoinForm teamNo={teamNo} teamColor={isRed ? "red" : "blue"} locked={room.participantsLocked} />
+    );
+  }
 
   const round = await prisma.round.findUnique({
     where: { roomId_roundNo: { roomId: room.id, roundNo: room.currentRound } },
@@ -86,6 +97,8 @@ export default async function PlayPage({
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 px-5 py-8">
       <PollRefresh />
+      <BackLock active={room.participantsLocked} />
+      <RememberTeam teamNo={teamNo} />
 
       <header className="flex flex-col items-center gap-3">
         <span
@@ -138,12 +151,7 @@ export default async function PlayPage({
           )}
 
           {round?.status === "BETTING" && !myBet?.confirmed && (
-            <BetForm
-              roomCode={room.code}
-              teamToken={me.accessToken}
-              maxBet={maxBet}
-              teamColor={isRed ? "red" : "blue"}
-            />
+            <BetForm teamNo={teamNo} maxBet={maxBet} teamColor={isRed ? "red" : "blue"} />
           )}
 
           {round?.status === "BETTING" && myBet?.confirmed && (

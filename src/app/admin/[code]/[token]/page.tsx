@@ -1,22 +1,22 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { headers } from "next/headers";
 import Link from "next/link";
 import { toPoints } from "@/lib/points";
 import { computeFinalBetAmount } from "@/lib/game";
 import ResultForm from "./ResultForm";
 import NextRoundButton from "./NextRoundButton";
-import LinksPanel from "./LinksPanel";
 import GameFlowPanel from "./GameFlowPanel";
 import GameControls from "./GameControls";
 import PollRefresh from "@/components/PollRefresh";
 import FinalRanking from "@/components/FinalRanking";
 import RoundHistoryTable from "@/components/RoundHistoryTable";
 import { getRoundHistory } from "@/lib/roundHistory";
-import RegisterRecentGame from "./RegisterRecentGame";
 import UndoButton from "./UndoButton";
 import { undoEvent } from "./undoActions";
 import { getActiveMultiplierEvent } from "@/lib/activeMultiplier";
+import { getCurrentRoom } from "@/lib/currentRoom";
+import RelinkRoomButton from "../../RelinkRoomButton";
+import ParticipantLockToggle from "./ParticipantLockToggle";
 
 // 실시간 게임 상태를 보여주는 페이지라 절대 캐싱하면 안 된다.
 export const dynamic = "force-dynamic";
@@ -46,20 +46,12 @@ export default async function AdminPage({
 
   const activeMultiplierEvent = await getActiveMultiplierEvent(room.id, round?.id, round?.status);
 
-  const headerList = await headers();
-  const host = headerList.get("host");
-  const protocol = host?.startsWith("localhost") || host?.startsWith("192.168") ? "http" : "https";
-  const origin = `${protocol}://${host}`;
+  const currentRoom = await getCurrentRoom();
+  const isCurrent = currentRoom?.id === room.id;
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-2xl flex-col gap-6 px-6 py-10">
       <PollRefresh />
-      <RegisterRecentGame
-        code={room.code}
-        adminToken={room.adminToken}
-        team1Name={room.teams[0].name}
-        team2Name={room.teams[1].name}
-      />
       <header className="flex items-start justify-between gap-1">
         <div>
           <h1 className="text-2xl font-black">진행자 화면</h1>
@@ -67,10 +59,22 @@ export default async function AdminPage({
             게임방 코드 <span className="font-mono font-bold text-ink">{room.code}</span> · ROUND{" "}
             {room.currentRound}
           </p>
+          {isCurrent ? (
+            <p className="mt-1 text-xs font-black text-win-ink">
+              ★ 지금 참가자 링크(1팀/2팀/중계)가 연결된 방입니다
+            </p>
+          ) : (
+            <div className="mt-1 flex items-center gap-2">
+              <p className="text-xs font-bold text-ink-faint">
+                더 이상 참가자 링크가 연결되어 있지 않은 과거 기록입니다
+              </p>
+              <RelinkRoomButton code={room.code} adminToken={room.adminToken} />
+            </div>
+          )}
         </div>
         <div className="flex flex-col items-end gap-1 text-sm font-bold">
-          <Link href="/" className="text-team-blue-ink underline">
-            홈으로
+          <Link href="/admin" className="text-team-blue-ink underline">
+            진행자 홈으로
           </Link>
           <Link
             href={`/admin/${room.code}/${room.adminToken}/history`}
@@ -110,6 +114,14 @@ export default async function AdminPage({
             </div>
           );
         })}
+      </section>
+
+      <section className="flex justify-center">
+        <ParticipantLockToggle
+          roomCode={room.code}
+          adminToken={room.adminToken}
+          locked={room.participantsLocked}
+        />
       </section>
 
       {activeMultiplierEvent && round && Number(round.multiplier) !== 1 && (
@@ -175,19 +187,6 @@ export default async function AdminPage({
 
       <section className="flex justify-center">
         <GameControls roomCode={room.code} adminToken={room.adminToken} />
-      </section>
-
-      <section className="flex justify-center">
-        <LinksPanel
-          links={[
-            ...room.teams.map((t) => ({
-              label: t.name,
-              url: `${origin}/play/${room.code}/${t.accessToken}`,
-            })),
-            { label: "중계 화면 (TV용)", url: `${origin}/watch/${room.code}` },
-            { label: "진행자 화면 (본인용 북마크)", url: `${origin}/admin/${room.code}/${room.adminToken}` },
-          ]}
-        />
       </section>
     </main>
   );

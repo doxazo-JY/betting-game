@@ -52,16 +52,17 @@ enum ScoreSourceType {
 }
 
 model Room {
-  id               String     @id @default(cuid())
-  code             String     @unique
-  adminToken       String     @unique
-  status           RoomStatus @default(SETUP)
-  team1Name        String     @default("1팀")
-  team2Name        String     @default("2팀")
-  startPoints      BigInt     @default(500)
-  negativeBetLimit BigInt     @default(500)
-  currentRound     Int        @default(1)
-  createdAt        DateTime   @default(now())
+  id                 String     @id @default(cuid())
+  code               String     @unique
+  adminToken         String     @unique
+  status             RoomStatus @default(SETUP)
+  team1Name          String     @default("1팀")
+  team2Name          String     @default("2팀")
+  startPoints        BigInt     @default(500)
+  negativeBetLimit   BigInt     @default(500)
+  currentRound       Int        @default(1)
+  createdAt          DateTime   @default(now())
+  participantsLocked Boolean    @default(false)
 
   teams             Team[]
   rounds            Round[]

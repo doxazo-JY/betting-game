@@ -5,10 +5,12 @@ import CopyableLink from "./CopyableLink";
 
 export default function LinksPanel({
   links,
+  defaultOpen,
 }: {
   links: { label: string; url: string }[];
+  defaultOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(!!defaultOpen);
 
   if (!open) {
     return (

@@ -1,0 +1,49 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { setParticipantsLocked } from "./actions";
+
+export default function ParticipantLockToggle({
+  roomCode,
+  adminToken,
+  locked,
+}: {
+  roomCode: string;
+  adminToken: string;
+  locked: boolean;
+}) {
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  function toggle() {
+    setError(null);
+    startTransition(async () => {
+      try {
+        await setParticipantsLocked(roomCode, adminToken, !locked);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "변경에 실패했습니다");
+      }
+    });
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <button
+        disabled={isPending}
+        onClick={toggle}
+        className={
+          "border-2 border-ink px-5 py-2 text-sm font-black shadow-sticker-sm disabled:opacity-50 " +
+          (locked ? "bg-event text-white" : "bg-paper-2 text-ink")
+        }
+      >
+        {locked ? "🔒 참가자 잠금 해제" : "참가자 화면 잠그기"}
+      </button>
+      <p className="text-xs font-semibold text-ink-faint">
+        {locked
+          ? "팀 화면에서 뒤로가기로 팀 선택 화면에 못 돌아가요"
+          : "켜두면 팀이 뒤로가기로 팀 선택 화면에 못 돌아가요"}
+      </p>
+      {error && <p className="text-xs font-bold text-lose-ink">{error}</p>}
+    </div>
+  );
+}

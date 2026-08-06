@@ -76,7 +76,12 @@
 
 body {
   min-height: 100dvh;
-  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bot) 55%, var(--sky-bot) 100%);
+  /* background-attachment: fixed로 하늘 배경을 뷰포트에 고정 — 이게 없으면
+     배경이 문서(스크롤 가능한 전체 높이) 기준으로 그려져서, 화면보다 긴
+     페이지를 스크롤할 때 고정된 잔디 띠(.world-ground) 아래로 하늘색이
+     어긋나 보이는 문제가 있었다. */
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bot) 55%, var(--sky-bot) 100%)
+    fixed;
   color: var(--ink);
   font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui,
     sans-serif;

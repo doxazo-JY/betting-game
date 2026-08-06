@@ -4,13 +4,11 @@ import { useState, useTransition } from "react";
 import { confirmBet } from "./actions";
 
 export default function BetForm({
-  roomCode,
-  teamToken,
+  teamNo,
   maxBet,
   teamColor,
 }: {
-  roomCode: string;
-  teamToken: string;
+  teamNo: 1 | 2;
   maxBet: number;
   teamColor: "red" | "blue";
 }) {
@@ -27,7 +25,7 @@ export default function BetForm({
     setError(null);
     startTransition(async () => {
       try {
-        await confirmBet(roomCode, teamToken, parsed);
+        await confirmBet(teamNo, parsed);
       } catch (e) {
         setError(e instanceof Error ? e.message : "배팅에 실패했습니다");
         setPhase("input");

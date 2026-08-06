@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "배팅 게임",
-  description: "교회 수련회 2팀 대항 실시간 배팅 게임",
+  title: "인투 오락실",
+  description: "하계수련회 인투 오락실 — 2팀 대항 실시간 배팅 게임",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

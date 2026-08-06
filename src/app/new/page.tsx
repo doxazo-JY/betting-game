@@ -1,9 +1,15 @@
+import Link from "next/link";
 import { createRoom } from "./actions";
 
 export default function NewRoomPage() {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-6 px-6 py-10">
-      <h1 className="text-2xl font-black">게임방 만들기</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-black">게임방 만들기</h1>
+        <Link href="/admin" className="text-sm font-bold text-team-blue-ink underline">
+          진행자 홈으로
+        </Link>
+      </div>
       <form action={createRoom} className="flex flex-col gap-5">
         <label className="flex flex-col gap-1">
           <span className="text-sm font-bold">1팀 이름</span>
