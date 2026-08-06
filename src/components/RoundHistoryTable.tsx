@@ -39,17 +39,38 @@ export default function RoundHistoryTable({
           </tr>
         </thead>
         <tbody>
-          {entries.map((e) => (
-            <tr key={e.roundNo} className="border-b border-line last:border-0">
-              <td className="whitespace-nowrap px-3 py-2 font-black">R{e.roundNo}</td>
-              <td className="whitespace-nowrap px-3 py-2 font-semibold">
-                <Cell result={e.team1} />
-              </td>
-              <td className="whitespace-nowrap px-3 py-2 font-semibold">
-                <Cell result={e.team2} />
-              </td>
-            </tr>
-          ))}
+          {entries.flatMap((e) => {
+            const rows = [];
+            if (e.swapAllBefore) {
+              rows.push(
+                <tr key={`${e.roundNo}-swap`} className="border-b border-line">
+                  <td
+                    colSpan={3}
+                    className="px-3 py-1.5 text-center text-xs font-semibold text-ink-faint"
+                  >
+                    전체 점수 교환
+                  </td>
+                </tr>
+              );
+            }
+            rows.push(
+              <tr key={e.roundNo} className="border-b border-line last:border-0">
+                <td className="whitespace-nowrap px-3 py-2 font-black">
+                  R{e.roundNo}
+                  {e.multiplier && (
+                    <span className="ml-1 font-semibold text-ink-faint">(×{e.multiplier})</span>
+                  )}
+                </td>
+                <td className="whitespace-nowrap px-3 py-2 font-semibold">
+                  <Cell result={e.team1} />
+                </td>
+                <td className="whitespace-nowrap px-3 py-2 font-semibold">
+                  <Cell result={e.team2} />
+                </td>
+              </tr>
+            );
+            return rows;
+          })}
         </tbody>
       </table>
     </div>

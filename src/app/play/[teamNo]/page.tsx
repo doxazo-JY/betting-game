@@ -14,6 +14,7 @@ import RoundHistoryTable from "@/components/RoundHistoryTable";
 import { getRoundHistory } from "@/lib/roundHistory";
 import ActiveMultiplierBanner from "@/components/ActiveMultiplierBanner";
 import { getActiveMultiplierEvent } from "@/lib/activeMultiplier";
+import GameInProgressBadge from "@/components/GameInProgressBadge";
 
 // 실시간 게임 상태를 보여주는 페이지라 절대 캐싱하면 안 된다. 캐싱되면
 // 새로고침(router.refresh)을 해도 오래된 화면이 계속 나온다.
@@ -154,7 +155,7 @@ export default async function PlayPage({
             <BetForm teamNo={teamNo} maxBet={maxBet} teamColor={isRed ? "red" : "blue"} />
           )}
 
-          {round?.status === "BETTING" && myBet?.confirmed && (
+          {round?.status === "BETTING" && myBet?.confirmed && !opponentBet?.confirmed && (
             <div className="flex flex-col items-center gap-3 border-[3px] border-ink bg-paper-2 p-7 text-center shadow-sticker">
               <div className="flex gap-1.5">
                 <span className="wait-dot h-2.5 w-2.5 rounded-full bg-ink" />
@@ -162,16 +163,14 @@ export default async function PlayPage({
                 <span className="wait-dot h-2.5 w-2.5 rounded-full bg-ink" />
               </div>
               <p className="text-lg font-black">배팅 완료!</p>
-              {opponentBet?.confirmed ? (
-                <p className="text-sm font-semibold text-ink-soft">
-                  두 팀 다 배팅을 마쳤어요. 곧 결과가 발표됩니다.
-                </p>
-              ) : (
-                <p className="text-sm font-semibold text-ink-soft">
-                  {opponent.name}의 배팅을 기다리고 있어요
-                </p>
-              )}
+              <p className="text-sm font-semibold text-ink-soft">
+                {opponent.name}의 배팅을 기다리고 있어요
+              </p>
             </div>
+          )}
+
+          {round?.status === "BETTING" && myBet?.confirmed && opponentBet?.confirmed && (
+            <GameInProgressBadge />
           )}
 
           {myResult && (
@@ -182,7 +181,7 @@ export default async function PlayPage({
                   (myResult.outcome === "WIN" ? "bg-win text-ink" : "bg-lose-tint text-lose-ink")
                 }
               >
-                {myResult.outcome === "WIN" ? "WIN!" : "GAME OVER"}
+                {myResult.outcome === "WIN" ? "WIN!" : "LOSE!"}
               </span>
               <p
                 className={

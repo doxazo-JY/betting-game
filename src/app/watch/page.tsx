@@ -7,6 +7,7 @@ import RoundHistoryTable from "@/components/RoundHistoryTable";
 import { getRoundHistory } from "@/lib/roundHistory";
 import ActiveMultiplierBanner from "@/components/ActiveMultiplierBanner";
 import { getActiveMultiplierEvent } from "@/lib/activeMultiplier";
+import GameInProgressBadge from "@/components/GameInProgressBadge";
 import { prisma } from "@/lib/prisma";
 
 // 실시간 게임 상태를 보여주는 페이지라 절대 캐싱하면 안 된다.
@@ -35,6 +36,10 @@ export default async function WatchPage() {
   const activeMultiplierEvent = await getActiveMultiplierEvent(room.id, round?.id, round?.status);
 
   const bothConfirmed = [team1, team2].every((t) => betByTeam.get(t.id)?.confirmed);
+
+  function calcResultAmount(result: { finalBetAmount: bigint }) {
+    return Math.trunc(toPoints(result.finalBetAmount) * Number(round!.multiplier));
+  }
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-4xl flex-col items-center justify-center gap-8 px-6 py-10 text-center">
@@ -89,9 +94,20 @@ export default async function WatchPage() {
                           (result.outcome === "WIN" ? "bg-win text-ink" : "bg-lose-tint text-lose-ink")
                         }
                       >
-                        {result.outcome === "WIN" ? "WIN!" : "GAME OVER"}
+                        {result.outcome === "WIN" ? "WIN!" : "LOSE!"}
                       </p>
-                      <p className="font-bold text-white/85">
+                      <p
+                        className={
+                          "border-2 border-ink px-4 py-1 text-2xl font-black tabular-nums " +
+                          (result.outcome === "WIN"
+                            ? "bg-win-tint text-win-ink"
+                            : "bg-lose-tint text-lose-ink")
+                        }
+                      >
+                        {result.outcome === "WIN" ? "+" : "-"}
+                        {calcResultAmount(result).toLocaleString()}P
+                      </p>
+                      <p className="text-sm font-bold text-white/70">
                         {toPoints(result.finalBetAmount).toLocaleString()}P 배팅
                       </p>
                     </>
@@ -117,9 +133,7 @@ export default async function WatchPage() {
           {(!round || round.status === "WAITING") && (
             <p className="text-xl font-bold text-ink-soft">라운드 시작을 기다리는 중...</p>
           )}
-          {round?.status === "BETTING" && bothConfirmed && (
-            <p className="text-xl font-black text-event-ink">게임 진행 중</p>
-          )}
+          {round?.status === "BETTING" && bothConfirmed && <GameInProgressBadge />}
 
           {activeMultiplierEvent && round && (
             <ActiveMultiplierBanner multiplier={Number(round.multiplier)} />
