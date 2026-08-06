@@ -1,10 +1,17 @@
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
-// pgbouncer(6543) 트랜잭션 풀링 연결은 이 Prisma/adapter-pg 조합에서
-// SASL 인증 오류가 발생해 direct 연결(5432)을 사용한다. 이 앱은 동시
-// 접속자가 소수(진행자+팀 2개)라 커넥션 풀링이 필요하지 않다.
-const adapter = new PrismaPg(process.env.DIRECT_URL!);
+// DIRECT_URL(5432)은 이름과 달리 실제로는 Supabase의 세션 모드 풀러를
+// 거치고 있어서(Supavisor), pool_size(예: 15)를 넘으면 EMAXCONNSESSION
+// 에러로 즉시 거부된다(2026-08-06, 실사용 테스트 중 재현) — 사용자 수가
+// 적어도, Next.js 라우트마다 별도 서버리스 인스턴스가 뜨고 그 인스턴스마다
+// PrismaPg가 자체 pg.Pool(기본 max 10)을 새로 만들기 때문에 인스턴스
+// 몇 개만 겹쳐도 쉽게 넘길 수 있다. DATABASE_URL(6543, pgbouncer=true)
+// 트랜잭션 모드는 이 인스턴스별 풀들이 전부 Supavisor라는 중앙 풀러의
+// 클라이언트가 되는 구조라, 인스턴스가 몇 개 뜨든 실제 Postgres 백엔드
+// 연결 수는 풀러가 중앙에서 제한한다 — 다만 실제로 몇 대까지 버티는지는
+// 아직 실측 전이라, 행사 전 부하 테스트로 확인 필요.
+const adapter = new PrismaPg(process.env.DATABASE_URL!);
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
