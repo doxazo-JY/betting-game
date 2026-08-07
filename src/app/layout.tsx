@@ -15,6 +15,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <span />
           <span />
           <span />
+          <span />
         </div>
         <div className="relative z-10 flex min-h-full flex-1 flex-col">{children}</div>
       </body>

@@ -15,6 +15,11 @@
   --grass-dk: #2e7d32;
   --dirt: #8d5a3b;
   --dirt-dk: #6b4226;
+  /* 홈 화면 흙 텍스처 전용 — 원래 --dirt-lt/--dirt-dk를 그대로 쓰면
+     대비가 너무 세서 조각조각 튄 색처럼 보인다(사용자 피드백). 기본
+     흙색에 가깝게 섞어서 톤만 살짝 다른 정도로 낮췄다. */
+  --dirt-lt: color-mix(in srgb, var(--dirt) 78%, #fff);
+  --dirt-dk-soft: color-mix(in srgb, var(--dirt-dk) 65%, var(--dirt));
 
   --ink: #1a1a1a;
   --ink-soft: #4d4d55;
@@ -105,17 +110,6 @@ body {
   font-family: ui-monospace, "SFMono-Regular", "Courier New", monospace;
 }
 
-/* 큰 타이틀/숫자에 쓰는 픽셀 외곽선 흉내 — 실제 비트맵 폰트 대신
-   text-shadow로 계단식 외곽선을 낸다 (한글 지원되는 픽셀 폰트가 마땅치 않음). */
-.pixel-outline {
-  -webkit-text-stroke: 1.5px var(--ink);
-  text-shadow:
-    -2px -2px 0 var(--ink),
-    2px -2px 0 var(--ink),
-    -2px 2px 0 var(--ink),
-    2px 2px 0 var(--ink);
-}
-
 /* 화면 전체에 깔리는 세계관 배경 — 장식이 아니라 모든 화면의 실제 배경.
    뷰포트 바닥에 고정해서 스크롤해도 항상 "이 세계 위에 서 있는" 느낌을 유지한다. */
 .world-ground {
@@ -144,48 +138,411 @@ body {
   z-index: 0;
   pointer-events: none;
 }
+/* 뭉툭한 십자 모양(예전 것)을 그대로 키웠더니 뿔 하나만 튀어나온 이상한
+   모양(변기?)으로 보인다는 피드백 — 위쪽이 둥근 봉우리 2개인 제대로 된
+   구름 실루엣으로 다시 그림(넓은 밑변 4칸 + 위에 봉우리 2칸). 금색
+   하나만 진짜 별(클립패스, .home-star와 같은 5각별)로 남겨둔다. */
 .world-stars span {
   position: absolute;
-  width: 4px;
-  height: 4px;
+  width: 8px;
+  height: 8px;
+  background: #fff;
 }
 .world-stars span:nth-child(1) {
   top: 8%;
   left: 10%;
   box-shadow:
-    4px 0 0 #fff,
     8px 0 0 #fff,
-    0 4px 0 #fff,
-    4px 4px 0 #fff,
-    8px 4px 0 #fff,
-    4px -4px 0 #fff,
-    -4px 4px 0 #fff,
-    12px 4px 0 #fff;
+    16px 0 0 #fff,
+    24px 0 0 #fff,
+    8px -8px 0 #fff,
+    16px -8px 0 #fff;
   opacity: 0.8;
 }
 .world-stars span:nth-child(2) {
   top: 14%;
   right: 12%;
-  box-shadow:
-    4px 0 0 var(--win),
-    8px 0 0 var(--win),
-    0 4px 0 var(--win),
-    4px 4px 0 var(--win),
-    8px 4px 0 var(--win),
-    4px -4px 0 var(--win),
-    -4px 4px 0 var(--win),
-    12px 4px 0 var(--win);
+  width: 24px;
+  height: 24px;
+  background: var(--win);
+  clip-path: polygon(
+    50% 0,
+    61% 36%,
+    100% 22%,
+    68% 52%,
+    92% 88%,
+    56% 67%,
+    48% 100%,
+    40% 64%,
+    0 78%,
+    31% 48%,
+    5% 17%,
+    43% 34%
+  );
+  filter: drop-shadow(1px 1px 0 var(--ink));
 }
 .world-stars span:nth-child(3) {
   top: 34%;
   left: 4%;
   box-shadow:
-    4px 0 0 #fff,
-    0 4px 0 #fff,
-    4px 4px 0 #fff,
-    8px 4px 0 #fff,
-    4px -4px 0 #fff;
+    8px 0 0 #fff,
+    16px 0 0 #fff,
+    24px 0 0 #fff,
+    8px -8px 0 #fff,
+    16px -8px 0 #fff;
+  opacity: 0.75;
+}
+.world-stars span:nth-child(4) {
+  top: 45%;
+  right: 20%;
+  transform: scale(0.85);
+  box-shadow:
+    8px 0 0 #fff,
+    16px 0 0 #fff,
+    24px 0 0 #fff,
+    8px -8px 0 #fff,
+    16px -8px 0 #fff;
   opacity: 0.7;
+}
+
+/* 홈 화면 전용 장식(땅·나무·잔디·별) — 참가자에게 처음 보이는 화면에만
+   쓴다. position: fixed로 뷰포트 전체에 깔아야 한다 — 홈 화면 본문은
+   max-w-md(모바일 폭)라, absolute로 두면 그 좁은 영역 안에서만 좌우
+   퍼센트가 계산돼 장식이 화면 가장자리가 아니라 가운데 근처에 몰려
+   보인다. */
+.home-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* pixel-decoration-code.html(사용자 제공, GPT 생성)의 .pdp-ground를 옮겨온
+   것 — 색만 var()로 바꿨고, 전체적으로 화면에 비해 작다는 피드백으로
+   원본(74px) 대비 1.5배 키웠다(112px). 기존 .world-ground(30px, 가로
+   줄무늬)와는 완전히 다른 그림: 세로 색상 밴드(밝은 초록 → 진한 초록 →
+   흙) + 삐죽 튀어나온 풀잎 실루엣 + 흙 구멍 텍스처로 이루어져 있다.
+   홈 화면에서는 이게 .world-ground 위를 그대로 덮어서 보인다(둘 다
+   bottom:0 고정이고 이게 더 높이 112px라). */
+.home-ground {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 112px;
+  border-top: 6px solid var(--grass-dk);
+  background: linear-gradient(
+    var(--grass) 0 14px,
+    var(--grass-dk) 14px 38px,
+    var(--dirt) 38px
+  );
+}
+/* 잔디 덤불 — 매끈한 삼각 스파이크 대신, 폭과 높이가 제각각인 사각
+   블록(계단 모양)을 듬성듬성 흩뿌렸다. 뾰족한 산 모양이 아니라 각진
+   턱이 있는 덩어리로 보이는 게 핵심 — clip-path 포인트를 같은 x에서
+   위/아래로 바로 꺾이게 짝지어서 사선 대신 직각 턱을 만든다. */
+.home-ground::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -18px;
+  height: 38px;
+  background: var(--grass);
+  clip-path: polygon(
+    0 100%,
+    3.6% 100%,
+    3.6% 28%,
+    7.7% 28%,
+    7.7% 100%,
+    14.4% 100%,
+    14.4% 45%,
+    18.3% 45%,
+    18.3% 100%,
+    21.1% 100%,
+    21.1% 65%,
+    23.1% 65%,
+    23.1% 100%,
+    27.7% 100%,
+    27.7% 20%,
+    31.9% 20%,
+    31.9% 100%,
+    38.9% 100%,
+    38.9% 65%,
+    42.8% 65%,
+    42.8% 100%,
+    47.8% 100%,
+    47.8% 65%,
+    51.4% 65%,
+    51.4% 100%,
+    54.5% 100%,
+    54.5% 65%,
+    59.1% 65%,
+    59.1% 100%,
+    65.7% 100%,
+    65.7% 15%,
+    69.3% 15%,
+    69.3% 100%,
+    74.8% 100%,
+    74.8% 65%,
+    77.1% 65%,
+    77.1% 100%,
+    83.9% 100%,
+    83.9% 65%,
+    86.1% 65%,
+    86.1% 100%,
+    88.7% 100%,
+    88.7% 35%,
+    94.2% 35%,
+    94.2% 100%,
+    100% 100%
+  );
+}
+/* 흙 얼룩 — 그라디언트로 "흉내"내지 않고, 실제 게임 타일셋처럼 크기가
+   제각각인(1~4칸) 네모 블록을 격자에 흩뿌린다(1.5배 키워 6px 격자).
+   "너무 원색이라 뜬금없다"는 피드백으로 두 가지를 더했다: (1) 색 자체를
+   기본 흙색에 가깝게(--dirt-lt/--dirt-dk-soft) 섞고, (2) filter: blur로
+   각진 사각 모서리를 흐려서 맞붙은 칸끼리 뭉치면 부드럽게 번지는
+   그라데이션처럼 보이게 했다. 1600px 폭까지 커버하도록 좌표를 미리
+   계산해서 나열했다. */
+.home-ground::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 38px;
+  width: 6px;
+  height: 6px;
+  background: transparent;
+  filter: blur(2px);
+  box-shadow:
+    63px 34px 0 0 var(--dirt-dk-soft),
+    63px 40px 0 0 var(--dirt-dk-soft),
+    63px 46px 0 0 var(--dirt-dk-soft),
+    69px 34px 0 0 var(--dirt-dk-soft),
+    69px 40px 0 0 var(--dirt-dk-soft),
+    69px 46px 0 0 var(--dirt-dk-soft),
+    75px 34px 0 0 var(--dirt-dk-soft),
+    75px 40px 0 0 var(--dirt-dk-soft),
+    75px 46px 0 0 var(--dirt-dk-soft),
+    111px 45px 0 0 var(--dirt-dk-soft),
+    111px 51px 0 0 var(--dirt-dk-soft),
+    147px 10px 0 0 var(--dirt-dk-soft),
+    147px 16px 0 0 var(--dirt-dk-soft),
+    171px 33px 0 0 var(--dirt-dk-soft),
+    171px 39px 0 0 var(--dirt-dk-soft),
+    177px 33px 0 0 var(--dirt-dk-soft),
+    177px 39px 0 0 var(--dirt-dk-soft),
+    213px 9px 0 0 var(--dirt-lt),
+    213px 15px 0 0 var(--dirt-lt),
+    213px 21px 0 0 var(--dirt-lt),
+    219px 9px 0 0 var(--dirt-lt),
+    219px 15px 0 0 var(--dirt-lt),
+    219px 21px 0 0 var(--dirt-lt),
+    243px 6px 0 0 var(--dirt-dk-soft),
+    291px 38px 0 0 var(--dirt-lt),
+    291px 44px 0 0 var(--dirt-lt),
+    291px 50px 0 0 var(--dirt-lt),
+    297px 38px 0 0 var(--dirt-lt),
+    297px 44px 0 0 var(--dirt-lt),
+    297px 50px 0 0 var(--dirt-lt),
+    339px 34px 0 0 var(--dirt-lt),
+    339px 40px 0 0 var(--dirt-lt),
+    339px 46px 0 0 var(--dirt-lt),
+    345px 34px 0 0 var(--dirt-lt),
+    345px 40px 0 0 var(--dirt-lt),
+    345px 46px 0 0 var(--dirt-lt),
+    399px 10px 0 0 var(--dirt-lt),
+    399px 16px 0 0 var(--dirt-lt),
+    399px 22px 0 0 var(--dirt-lt),
+    399px 28px 0 0 var(--dirt-lt),
+    405px 10px 0 0 var(--dirt-lt),
+    405px 16px 0 0 var(--dirt-lt),
+    405px 22px 0 0 var(--dirt-lt),
+    405px 28px 0 0 var(--dirt-lt),
+    411px 10px 0 0 var(--dirt-lt),
+    411px 16px 0 0 var(--dirt-lt),
+    411px 22px 0 0 var(--dirt-lt),
+    411px 28px 0 0 var(--dirt-lt),
+    417px 10px 0 0 var(--dirt-lt),
+    417px 16px 0 0 var(--dirt-lt),
+    417px 22px 0 0 var(--dirt-lt),
+    417px 28px 0 0 var(--dirt-lt),
+    465px 6px 0 0 var(--dirt-lt),
+    465px 12px 0 0 var(--dirt-lt),
+    471px 6px 0 0 var(--dirt-lt),
+    471px 12px 0 0 var(--dirt-lt),
+    477px 6px 0 0 var(--dirt-lt),
+    477px 12px 0 0 var(--dirt-lt),
+    507px 29px 0 0 var(--dirt-lt),
+    507px 35px 0 0 var(--dirt-lt),
+    507px 41px 0 0 var(--dirt-lt),
+    513px 29px 0 0 var(--dirt-lt),
+    513px 35px 0 0 var(--dirt-lt),
+    513px 41px 0 0 var(--dirt-lt),
+    537px 18px 0 0 var(--dirt-lt),
+    543px 18px 0 0 var(--dirt-lt),
+    549px 18px 0 0 var(--dirt-lt),
+    609px 31px 0 0 var(--dirt-lt),
+    609px 37px 0 0 var(--dirt-lt),
+    609px 43px 0 0 var(--dirt-lt),
+    615px 31px 0 0 var(--dirt-lt),
+    615px 37px 0 0 var(--dirt-lt),
+    615px 43px 0 0 var(--dirt-lt),
+    651px 10px 0 0 var(--dirt-lt),
+    657px 10px 0 0 var(--dirt-lt),
+    663px 10px 0 0 var(--dirt-lt),
+    711px 12px 0 0 var(--dirt-lt),
+    711px 18px 0 0 var(--dirt-lt),
+    747px 34px 0 0 var(--dirt-dk-soft),
+    753px 34px 0 0 var(--dirt-dk-soft),
+    759px 34px 0 0 var(--dirt-dk-soft),
+    795px 37px 0 0 var(--dirt-lt),
+    801px 37px 0 0 var(--dirt-lt),
+    807px 37px 0 0 var(--dirt-lt),
+    843px 30px 0 0 var(--dirt-dk-soft),
+    843px 36px 0 0 var(--dirt-dk-soft),
+    849px 30px 0 0 var(--dirt-dk-soft),
+    849px 36px 0 0 var(--dirt-dk-soft),
+    885px 42px 0 0 var(--dirt-lt),
+    885px 48px 0 0 var(--dirt-lt),
+    885px 54px 0 0 var(--dirt-lt),
+    909px 43px 0 0 var(--dirt-dk-soft),
+    909px 49px 0 0 var(--dirt-dk-soft),
+    939px 33px 0 0 var(--dirt-lt),
+    963px 23px 0 0 var(--dirt-dk-soft),
+    963px 29px 0 0 var(--dirt-dk-soft),
+    969px 23px 0 0 var(--dirt-dk-soft),
+    969px 29px 0 0 var(--dirt-dk-soft),
+    975px 23px 0 0 var(--dirt-dk-soft),
+    975px 29px 0 0 var(--dirt-dk-soft),
+    1005px 45px 0 0 var(--dirt-lt),
+    1029px 34px 0 0 var(--dirt-lt),
+    1029px 40px 0 0 var(--dirt-lt),
+    1035px 34px 0 0 var(--dirt-lt),
+    1035px 40px 0 0 var(--dirt-lt),
+    1095px 29px 0 0 var(--dirt-lt),
+    1101px 29px 0 0 var(--dirt-lt),
+    1107px 29px 0 0 var(--dirt-lt),
+    1143px 44px 0 0 var(--dirt-lt),
+    1149px 44px 0 0 var(--dirt-lt),
+    1185px 40px 0 0 var(--dirt-lt),
+    1185px 46px 0 0 var(--dirt-lt),
+    1239px 31px 0 0 var(--dirt-lt),
+    1239px 37px 0 0 var(--dirt-lt),
+    1245px 31px 0 0 var(--dirt-lt),
+    1245px 37px 0 0 var(--dirt-lt),
+    1251px 31px 0 0 var(--dirt-lt),
+    1251px 37px 0 0 var(--dirt-lt),
+    1281px 21px 0 0 var(--dirt-lt),
+    1281px 27px 0 0 var(--dirt-lt),
+    1335px 43px 0 0 var(--dirt-dk-soft),
+    1335px 49px 0 0 var(--dirt-dk-soft),
+    1335px 55px 0 0 var(--dirt-dk-soft),
+    1377px 9px 0 0 var(--dirt-lt),
+    1377px 15px 0 0 var(--dirt-lt),
+    1377px 21px 0 0 var(--dirt-lt),
+    1377px 27px 0 0 var(--dirt-lt),
+    1383px 9px 0 0 var(--dirt-lt),
+    1383px 15px 0 0 var(--dirt-lt),
+    1383px 21px 0 0 var(--dirt-lt),
+    1383px 27px 0 0 var(--dirt-lt),
+    1419px 44px 0 0 var(--dirt-dk-soft),
+    1419px 50px 0 0 var(--dirt-dk-soft),
+    1419px 56px 0 0 var(--dirt-dk-soft),
+    1425px 44px 0 0 var(--dirt-dk-soft),
+    1425px 50px 0 0 var(--dirt-dk-soft),
+    1425px 56px 0 0 var(--dirt-dk-soft),
+    1455px 18px 0 0 var(--dirt-lt),
+    1455px 24px 0 0 var(--dirt-lt),
+    1455px 30px 0 0 var(--dirt-lt),
+    1455px 36px 0 0 var(--dirt-lt),
+    1485px 8px 0 0 var(--dirt-lt),
+    1485px 14px 0 0 var(--dirt-lt),
+    1521px 13px 0 0 var(--dirt-lt),
+    1521px 19px 0 0 var(--dirt-lt),
+    1569px 26px 0 0 var(--dirt-dk-soft),
+    1569px 32px 0 0 var(--dirt-dk-soft),
+    1605px 35px 0 0 var(--dirt-lt),
+    1605px 41px 0 0 var(--dirt-lt),
+    1605px 47px 0 0 var(--dirt-lt),
+    1605px 53px 0 0 var(--dirt-lt),
+    1611px 35px 0 0 var(--dirt-lt),
+    1611px 41px 0 0 var(--dirt-lt),
+    1611px 47px 0 0 var(--dirt-lt),
+    1611px 53px 0 0 var(--dirt-lt);
+}
+
+.home-spark {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--paper-2);
+}
+.home-spark::before,
+.home-spark::after {
+  content: "";
+  position: absolute;
+  background: inherit;
+}
+.home-spark::before {
+  width: 6px;
+  height: 24px;
+  left: 0;
+  top: -9px;
+}
+.home-spark::after {
+  width: 24px;
+  height: 6px;
+  left: -9px;
+  top: 0;
+}
+.home-spark--gold {
+  background: var(--win);
+}
+
+.home-star {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  background: var(--win);
+  clip-path: polygon(
+    50% 0,
+    61% 36%,
+    100% 22%,
+    68% 52%,
+    92% 88%,
+    56% 67%,
+    48% 100%,
+    40% 64%,
+    0 78%,
+    31% 48%,
+    5% 17%,
+    43% 34%
+  );
+  filter: drop-shadow(2px 2px 0 var(--ink));
+}
+
+.home-turf {
+  position: absolute;
+  bottom: 100px;
+  width: 60px;
+  height: 24px;
+  background: var(--grass);
+  clip-path: polygon(
+    0 100%,
+    0 52%,
+    13% 76%,
+    20% 0,
+    26% 72%,
+    42% 35%,
+    48% 81%,
+    62% 12%,
+    69% 75%,
+    85% 38%,
+    100% 80%,
+    100% 100%
+  );
 }
 
 /* 스티커/픽셀 패널 — 그라디언트·글로우 대신 두꺼운 잉크 테두리 +
