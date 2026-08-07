@@ -1,4 +1,4 @@
-import type { RoundHistoryEntry } from "@/lib/roundHistory";
+import type { RoundHistoryEntry, SwapPointsEntry } from "@/lib/roundHistory";
 
 function Cell({ result }: { result: RoundHistoryEntry["team1"] }) {
   if (!result) return <span className="text-ink-faint">-</span>;
@@ -9,6 +9,19 @@ function Cell({ result }: { result: RoundHistoryEntry["team1"] }) {
         ({result.delta >= 0 ? "+" : ""}
         {result.delta.toLocaleString()}P)
       </span>
+      <br />
+      <span className="text-xs font-semibold text-ink-faint">
+        {result.pointsBefore.toLocaleString()}P → {result.pointsAfter.toLocaleString()}P
+      </span>
+    </span>
+  );
+}
+
+function SwapCell({ points }: { points: SwapPointsEntry | null }) {
+  if (!points) return null;
+  return (
+    <span className="text-xs font-semibold text-ink-faint">
+      {points.before.toLocaleString()}P → {points.after.toLocaleString()}P
     </span>
   );
 }
@@ -44,11 +57,14 @@ export default function RoundHistoryTable({
             if (e.swapAllBefore) {
               rows.push(
                 <tr key={`${e.roundNo}-swap`} className="border-b border-line">
-                  <td
-                    colSpan={3}
-                    className="px-3 py-1.5 text-center text-xs font-semibold text-ink-faint"
-                  >
+                  <td className="px-3 py-1.5 text-center text-xs font-semibold text-ink-faint">
                     전체 점수 교환
+                  </td>
+                  <td className="px-3 py-1.5 text-center">
+                    <SwapCell points={e.swapTeam1} />
+                  </td>
+                  <td className="px-3 py-1.5 text-center">
+                    <SwapCell points={e.swapTeam2} />
                   </td>
                 </tr>
               );

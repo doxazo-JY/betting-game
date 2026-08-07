@@ -50,40 +50,41 @@ export default async function PlayPage({
     );
   }
 
-  const round = await prisma.round.findUnique({
-    where: { roomId_roundNo: { roomId: room.id, roundNo: room.currentRound } },
-  });
+  // 서로 의존 관계가 없는 조회는 Promise.all로 병렬 실행한다 — 순차 await로
+  // 짜면 폴링(PollRefresh)마다 DB 왕복이 그대로 누적돼 화면 반영이 눈에
+  // 띄게 느려진다(중계 화면은 조회가 적어 이 문제가 덜 드러났었음).
+  const [round, visibleEvent] = await Promise.all([
+    prisma.round.findUnique({
+      where: { roomId_roundNo: { roomId: room.id, roundNo: room.currentRound } },
+    }),
+    getVisibleEventForTeam(room.id, me),
+  ]);
 
-  const myBet = round
-    ? await prisma.bet.findUnique({
-        where: { roundId_teamId: { roundId: round.id, teamId: me.id } },
-      })
-    : null;
+  const isResolved = round?.status === "RESOLVED";
 
-  const opponentBet = round
-    ? await prisma.bet.findUnique({
-        where: { roundId_teamId: { roundId: round.id, teamId: opponent.id } },
-      })
-    : null;
-
-  const myResult =
-    round?.status === "RESOLVED"
-      ? await prisma.roundResult.findUnique({
-          where: { roundId_teamId: { roundId: round.id, teamId: me.id } },
-        })
-      : null;
-
-  // 배팅 금액은 라운드가 끝나기 전까지만 비공개다. 결과가 나온 뒤에는
-  // 상대 팀 배팅 금액도 공개해도 된다.
-  const opponentResult =
-    round?.status === "RESOLVED"
-      ? await prisma.roundResult.findUnique({
+  const [myBet, opponentBet, myResult, opponentResult, activeMultiplierEvent] = await Promise.all([
+    round
+      ? prisma.bet.findUnique({ where: { roundId_teamId: { roundId: round.id, teamId: me.id } } })
+      : null,
+    round
+      ? prisma.bet.findUnique({
           where: { roundId_teamId: { roundId: round.id, teamId: opponent.id } },
         })
-      : null;
-
-  const visibleEvent = await getVisibleEventForTeam(room.id, me);
-  const activeMultiplierEvent = await getActiveMultiplierEvent(room.id, round?.id, round?.status);
+      : null,
+    isResolved
+      ? prisma.roundResult.findUnique({
+          where: { roundId_teamId: { roundId: round!.id, teamId: me.id } },
+        })
+      : null,
+    // 배팅 금액은 라운드가 끝나기 전까지만 비공개다. 결과가 나온 뒤에는
+    // 상대 팀 배팅 금액도 공개해도 된다.
+    isResolved
+      ? prisma.roundResult.findUnique({
+          where: { roundId_teamId: { roundId: round!.id, teamId: opponent.id } },
+        })
+      : null,
+    getActiveMultiplierEvent(room.id, round?.id, round?.status),
+  ]);
 
   const maxBet =
     me.currentPoints > BigInt(0) ? toPoints(me.currentPoints) : toPoints(room.negativeBetLimit);

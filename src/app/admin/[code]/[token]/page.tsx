@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { toPoints } from "@/lib/points";
-import { computeFinalBetAmount } from "@/lib/game";
 import ResultForm from "./ResultForm";
 import NextRoundButton from "./NextRoundButton";
 import GameFlowPanel from "./GameFlowPanel";
@@ -37,16 +36,22 @@ export default async function AdminPage({
     notFound();
   }
 
-  const round = await prisma.round.findUnique({
-    where: { roomId_roundNo: { roomId: room.id, roundNo: room.currentRound } },
-  });
+  // 서로 의존 관계가 없는 조회는 Promise.all로 병렬 실행한다 — 순차 await로
+  // 짜면 폴링(PollRefresh)마다 DB 왕복이 그대로 누적돼 화면 반영이 눈에
+  // 띄게 느려진다(중계 화면은 조회가 적어 이 문제가 덜 드러났었음).
+  const [round, currentRoom] = await Promise.all([
+    prisma.round.findUnique({
+      where: { roomId_roundNo: { roomId: room.id, roundNo: room.currentRound } },
+    }),
+    getCurrentRoom(),
+  ]);
 
-  const bets = round ? await prisma.bet.findMany({ where: { roundId: round.id } }) : [];
+  const [bets, activeMultiplierEvent] = await Promise.all([
+    round ? prisma.bet.findMany({ where: { roundId: round.id } }) : [],
+    getActiveMultiplierEvent(room.id, round?.id, round?.status),
+  ]);
   const betByTeam = new Map(bets.map((b) => [b.teamId, b]));
 
-  const activeMultiplierEvent = await getActiveMultiplierEvent(room.id, round?.id, round?.status);
-
-  const currentRoom = await getCurrentRoom();
   const isCurrent = currentRoom?.id === room.id;
 
   return (
@@ -171,8 +176,10 @@ export default async function AdminPage({
                 adminToken={room.adminToken}
                 team1Name={room.teams[0].name}
                 team2Name={room.teams[1].name}
-                team1FinalBet={toPoints(await computeFinalBetAmount(round.id, room.teams[0].id))}
-                team2FinalBet={toPoints(await computeFinalBetAmount(round.id, room.teams[1].id))}
+                // 두 팀 다 확정된 상태라 이미 위에서 가져온 bets 맵의 금액이 곧
+                // 최종 배팅액이다 — computeFinalBetAmount로 다시 조회할 필요 없음.
+                team1FinalBet={toPoints(betByTeam.get(room.teams[0].id)!.amount)}
+                team2FinalBet={toPoints(betByTeam.get(room.teams[1].id)!.amount)}
                 multiplier={Number(round.multiplier)}
               />
             )}
@@ -185,9 +192,11 @@ export default async function AdminPage({
         </>
       )}
 
-      <section className="flex justify-center">
-        <GameControls roomCode={room.code} adminToken={room.adminToken} />
-      </section>
+      {room.status !== "ENDED" && (
+        <section className="flex justify-center">
+          <GameControls roomCode={room.code} adminToken={room.adminToken} />
+        </section>
+      )}
     </main>
   );
 }
