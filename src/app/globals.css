@@ -160,19 +160,19 @@ body {
    하나만 진짜 별(클립패스, .home-star와 같은 5각별)로 남겨둔다. */
 .world-stars span {
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: 13px;
+  height: 13px;
   background: #fff;
 }
 .world-stars span:nth-child(1) {
   top: 6%;
   left: 8%;
   box-shadow:
-    8px 0 0 #fff,
-    16px 0 0 #fff,
-    24px 0 0 #fff,
-    8px -8px 0 #fff,
-    16px -8px 0 #fff;
+    13px 0 0 #fff,
+    26px 0 0 #fff,
+    39px 0 0 #fff,
+    13px -13px 0 #fff,
+    26px -13px 0 #fff;
   opacity: 0.8;
 }
 .world-stars span:nth-child(2) {
@@ -201,11 +201,11 @@ body {
   top: 38%;
   left: 5%;
   box-shadow:
-    8px 0 0 #fff,
-    16px 0 0 #fff,
-    24px 0 0 #fff,
-    8px -8px 0 #fff,
-    16px -8px 0 #fff;
+    13px 0 0 #fff,
+    26px 0 0 #fff,
+    39px 0 0 #fff,
+    13px -13px 0 #fff,
+    26px -13px 0 #fff;
   opacity: 0.75;
 }
 .world-stars span:nth-child(4) {
@@ -213,11 +213,11 @@ body {
   right: 14%;
   transform: scale(0.85);
   box-shadow:
-    8px 0 0 #fff,
-    16px 0 0 #fff,
-    24px 0 0 #fff,
-    8px -8px 0 #fff,
-    16px -8px 0 #fff;
+    13px 0 0 #fff,
+    26px 0 0 #fff,
+    39px 0 0 #fff,
+    13px -13px 0 #fff,
+    26px -13px 0 #fff;
   opacity: 0.7;
 }
 
