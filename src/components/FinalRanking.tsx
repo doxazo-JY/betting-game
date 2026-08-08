@@ -19,25 +19,26 @@ export default function FinalRanking({
 
   return (
     <div className="animate-pop-in flex flex-col items-center gap-4 border-[3px] border-ink bg-paper-2 p-8 text-center shadow-sticker">
-      <div className="flex items-center gap-2">
+      {myTeamNo ? (
+        // 팀 화면에서는 "GAME OVER"보다 내 팀 승/패가 훨씬 중요한
+        // 정보라, 작은 뱃지 대신 이걸 화면에서 가장 크게 보여준다.
+        <span
+          className={
+            "border-[3px] border-ink px-8 py-3 text-3xl font-black tracking-wide " +
+            (ranking.type === "tie"
+              ? "bg-paper text-ink-soft"
+              : ranking.winnerTeamNo === myTeamNo
+                ? "bg-win text-ink"
+                : "bg-lose-tint text-lose-ink")
+          }
+        >
+          {ranking.type === "tie" ? "무승부" : ranking.winnerTeamNo === myTeamNo ? "WIN!" : "LOSE!"}
+        </span>
+      ) : (
         <span className="border-2 border-ink bg-ink px-4 py-1 text-xs font-black tracking-wide text-paper-2">
           GAME OVER
         </span>
-        {myTeamNo &&
-          (ranking.type === "tie" ? (
-            <span className="border-2 border-ink bg-paper px-4 py-1 text-xs font-black tracking-wide text-ink-soft">
-              무승부
-            </span>
-          ) : ranking.winnerTeamNo === myTeamNo ? (
-            <span className="border-2 border-ink bg-win px-4 py-1 text-xs font-black tracking-wide text-ink">
-              WIN!
-            </span>
-          ) : (
-            <span className="border-2 border-ink bg-lose-tint px-4 py-1 text-xs font-black tracking-wide text-lose-ink">
-              LOSE!
-            </span>
-          ))}
-      </div>
+      )}
       {ranking.type === "winner" ? (
         <p className="text-3xl font-black text-win-ink">
           {ranking.winnerTeamNo === 1 ? team1Name : team2Name} 우승!
