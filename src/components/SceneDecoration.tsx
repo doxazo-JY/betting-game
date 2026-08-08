@@ -26,17 +26,17 @@ export default function SceneDecoration() {
     <div className="home-scene" aria-hidden="true">
       <div className="home-ground" />
 
-      <span className="home-star" style={{ top: "7%", right: "16%" }} />
-      <span className="home-star" style={{ top: "22%", left: "10%", transform: "scale(0.8)" }} />
-      <span className="home-star" style={{ top: "50%", right: "6%", transform: "scale(0.65)" }} />
-      <span className="home-star" style={{ top: "62%", left: "5%", transform: "scale(0.55)" }} />
+      <span className="home-star" style={{ top: "20%", right: "22%" }} />
+      <span className="home-star" style={{ top: "30%", left: "12%", transform: "scale(0.8)" }} />
+      <span className="home-star" style={{ top: "48%", right: "6%", transform: "scale(0.65)" }} />
+      <span className="home-star" style={{ top: "68%", left: "6%", transform: "scale(0.55)" }} />
 
-      <span className="home-spark" style={{ top: "10%", left: "22%" }} />
-      <span className="home-spark home-spark--gold" style={{ top: "16%", right: "30%" }} />
-      <span className="home-spark" style={{ top: "30%", right: "10%" }} />
-      <span className="home-spark home-spark--gold" style={{ top: "40%", left: "6%" }} />
-      <span className="home-spark" style={{ top: "56%", left: "28%" }} />
-      <span className="home-spark home-spark--gold" style={{ top: "68%", right: "20%" }} />
+      <span className="home-spark" style={{ top: "14%", left: "24%" }} />
+      <span className="home-spark home-spark--gold" style={{ top: "26%", right: "32%" }} />
+      <span className="home-spark" style={{ top: "42%", right: "16%" }} />
+      <span className="home-spark home-spark--gold" style={{ top: "46%", left: "8%" }} />
+      <span className="home-spark" style={{ top: "60%", left: "30%" }} />
+      <span className="home-spark home-spark--gold" style={{ top: "72%", right: "22%" }} />
 
       {/* next/image가 className만으로는 폭을 안 따라줘서(자체적으로
           인라인 스타일을 박음) width를 style에서 var()로 직접 지정 —
