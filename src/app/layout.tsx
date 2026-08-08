@@ -10,6 +10,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="ko" className="h-full antialiased">
       <body className="relative min-h-full flex flex-col">
+        <div className="world-sky" />
         <div className="world-ground" />
         <div className="world-stars">
           <span />

@@ -12,7 +12,7 @@ export default async function Home() {
   const locked = room?.participantsLocked ?? false;
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-8 px-6 py-10 text-center">
+    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-8 px-6 py-10 text-center max-sm:gap-5">
       <SceneDecoration />
       <Image
         src="/인투오락실.png"
@@ -20,9 +20,9 @@ export default async function Home() {
         width={1586}
         height={992}
         priority
-        className="relative z-10 w-full"
+        className="relative z-10 w-full max-sm:w-[78%]"
       />
-      <div className="relative z-10 w-full">
+      <div className="relative z-10 w-full max-sm:w-[78%]">
         <HomeGate locked={locked}>
           <div className="flex w-full flex-col gap-4">
             <Link
