@@ -206,32 +206,21 @@ body {
    면이 확실한 자리로 좌표를 직접 확인해서 골랐다)에 얹어 입체감을
    낸다. clip-path는 부모에만 걸려있고 의사요소는 그 영향을 안 받아서,
    좌표만 구름 실루엣 안쪽으로 잘 잡으면 따로 잘라낼 필요가 없다. */
-.world-stars span:nth-child(1)::before,
 .world-stars span:nth-child(1)::after,
-.world-stars span:nth-child(3)::before,
 .world-stars span:nth-child(3)::after,
-.world-stars span:nth-child(4)::before,
 .world-stars span:nth-child(4)::after {
   content: "";
   position: absolute;
   background: var(--sky-top);
   opacity: 0.55;
-}
-.world-stars span:nth-child(1)::before,
-.world-stars span:nth-child(3)::before,
-.world-stars span:nth-child(4)::before {
-  width: 7px;
-  height: 6px;
-  left: 40px;
-  top: 6px;
-}
-.world-stars span:nth-child(1)::after,
-.world-stars span:nth-child(3)::after,
-.world-stars span:nth-child(4)::after {
-  width: 6px;
-  height: 6px;
-  left: 56px;
-  top: 15px;
+  /* 작은 사각형 두 개를 흰 면 한가운데 띄웠더니 "구멍 난 것처럼" 보였다
+     — 참고 이미지처럼 아래쪽 가장자리에 맞닿는 넓은 띠 하나로 바꿔서
+     그림자처럼 자연스럽게 이어지게 한다(격자 계산상 구름 밑변은
+     정확히 사각형이라 clip-path 없이 그냥 사각형만 놓으면 됨). */
+  left: 6px;
+  top: 24px;
+  right: 6px;
+  bottom: 0;
 }
 .world-stars span:nth-child(1) {
   top: 3%;
