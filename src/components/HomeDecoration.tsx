@@ -30,27 +30,24 @@ export default function HomeDecoration() {
       <span className="home-spark" style={{ top: "56%", left: "28%" }} />
       <span className="home-spark home-spark--gold" style={{ top: "68%", right: "20%" }} />
 
+      {/* next/image가 className만으로는 폭을 안 따라줘서(자체적으로
+          인라인 스타일을 박음) width를 style에서 var()로 직접 지정 —
+          이 변수는 globals.css의 모바일 미디어 쿼리에서 재정의된다. */}
       <Image
         src="/tree-trace.png"
         alt=""
         width={286}
         height={233}
-        className="absolute"
-        style={{ left: "1%", bottom: "106px", width: "230px", height: "auto" }}
+        className="home-tree-img home-tree-img--left"
+        style={{ width: "var(--tree-left-w)", height: "auto" }}
       />
       <Image
         src="/tree-trace.png"
         alt=""
         width={286}
         height={233}
-        className="absolute"
-        style={{
-          right: "1%",
-          bottom: "106px",
-          width: "185px",
-          height: "auto",
-          transform: "scaleX(-1)",
-        }}
+        className="home-tree-img home-tree-img--right"
+        style={{ width: "var(--tree-right-w)", height: "auto" }}
       />
 
       <span className="home-turf" style={{ left: "20%" }} />
