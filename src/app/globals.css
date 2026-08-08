@@ -159,9 +159,10 @@ body {
 }
 /* 구름 — clip-path로 손수 그린 도형은 몇 차례 고쳐도 "따로 논다",
    "구멍 난 것 같다"는 피드백이 반복돼서, 결국 사용자가 만든 픽셀아트
-   (32×19칸, public/cloud-pixel.png)를 그대로 이미지로 구워서 쓴다.
-   image-rendering: pixelated로 확대해도 흐려지지 않게 함. 위치·크기는
-   layout.tsx의 인라인 style에서 지정. */
+   (48×22칸, public/cloud-pixel-small.png, 테두리 없이 흰색+옅은
+   하늘색 두 톤)를 그대로 이미지로 구워서 쓴다. image-rendering:
+   pixelated로 확대해도 흐려지지 않게 함. 위치·크기는 layout.tsx의
+   인라인 style에서 지정. */
 .world-cloud {
   position: absolute;
   height: auto;
