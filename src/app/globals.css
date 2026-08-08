@@ -56,6 +56,20 @@
   --tree-left-w: 230px;
   --tree-right-w: 185px;
   --tree-bottom: 106px;
+
+  /* 구름 크기 — 모바일 기준 크기가 딱 맞다는 피드백으로 이걸 기본값으로
+     두고, 데스크톱(min-width: 641px)에서만 2배로 키운다. */
+  --cloud1-w: 100px;
+  --cloud2-w: 80px;
+  --cloud3-w: 85px;
+}
+
+@media (min-width: 641px) {
+  :root {
+    --cloud1-w: 200px;
+    --cloud2-w: 160px;
+    --cloud3-w: 170px;
+  }
 }
 
 @theme inline {

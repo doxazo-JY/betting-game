@@ -24,7 +24,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             width={384}
             height={176}
             className="world-cloud"
-            style={{ top: "3%", left: "8%", width: "100px", opacity: 0.85 }}
+            style={{ top: "3%", left: "8%", width: "var(--cloud1-w)", opacity: 0.85 }}
           />
           <span />
           <Image
@@ -33,7 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             width={384}
             height={176}
             className="world-cloud"
-            style={{ top: "16%", left: "5%", width: "80px", opacity: 0.8 }}
+            style={{ top: "16%", left: "5%", width: "var(--cloud2-w)", opacity: 0.8 }}
           />
           <Image
             src="/cloud-pixel-small.png"
@@ -41,7 +41,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             width={384}
             height={176}
             className="world-cloud"
-            style={{ top: "26%", right: "14%", width: "85px", opacity: 0.75 }}
+            style={{ top: "26%", right: "14%", width: "var(--cloud3-w)", opacity: 0.75 }}
           />
         </div>
         <div className="relative z-10 flex min-h-full flex-1 flex-col">{children}</div>
