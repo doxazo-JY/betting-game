@@ -202,8 +202,39 @@ body {
     drop-shadow(1.5px 0 0 var(--ink)) drop-shadow(-1.5px 0 0 var(--ink))
     drop-shadow(0 1.5px 0 var(--ink)) drop-shadow(0 -1.5px 0 var(--ink));
 }
+/* 음영 — 참고 이미지처럼 하늘색 계열 각진 조각 두 개를 구름 안쪽(흰
+   면이 확실한 자리로 좌표를 직접 확인해서 골랐다)에 얹어 입체감을
+   낸다. clip-path는 부모에만 걸려있고 의사요소는 그 영향을 안 받아서,
+   좌표만 구름 실루엣 안쪽으로 잘 잡으면 따로 잘라낼 필요가 없다. */
+.world-stars span:nth-child(1)::before,
+.world-stars span:nth-child(1)::after,
+.world-stars span:nth-child(3)::before,
+.world-stars span:nth-child(3)::after,
+.world-stars span:nth-child(4)::before,
+.world-stars span:nth-child(4)::after {
+  content: "";
+  position: absolute;
+  background: var(--sky-top);
+  opacity: 0.55;
+}
+.world-stars span:nth-child(1)::before,
+.world-stars span:nth-child(3)::before,
+.world-stars span:nth-child(4)::before {
+  width: 7px;
+  height: 6px;
+  left: 40px;
+  top: 6px;
+}
+.world-stars span:nth-child(1)::after,
+.world-stars span:nth-child(3)::after,
+.world-stars span:nth-child(4)::after {
+  width: 6px;
+  height: 6px;
+  left: 56px;
+  top: 15px;
+}
 .world-stars span:nth-child(1) {
-  top: 6%;
+  top: 3%;
   left: 8%;
   opacity: 0.85;
 }
@@ -230,12 +261,12 @@ body {
   filter: drop-shadow(1px 1px 0 var(--ink));
 }
 .world-stars span:nth-child(3) {
-  top: 38%;
+  top: 16%;
   left: 5%;
   opacity: 0.8;
 }
 .world-stars span:nth-child(4) {
-  top: 58%;
+  top: 26%;
   right: 14%;
   transform: scale(0.85);
   opacity: 0.75;
