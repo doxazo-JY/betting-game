@@ -132,6 +132,7 @@ export default async function PlayPage({
             team2Name={room.teams.find((t) => t.teamNo === 2)!.name}
             team1Points={toPoints(room.teams.find((t) => t.teamNo === 1)!.currentPoints)}
             team2Points={toPoints(room.teams.find((t) => t.teamNo === 2)!.currentPoints)}
+            myTeamNo={teamNo}
           />
           <RoundHistoryTable
             team1Name={room.teams.find((t) => t.teamNo === 1)!.name}
