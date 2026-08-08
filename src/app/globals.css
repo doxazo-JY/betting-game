@@ -154,26 +154,58 @@ body {
   z-index: 0;
   pointer-events: none;
 }
-/* 뭉툭한 십자 모양(예전 것)을 그대로 키웠더니 뿔 하나만 튀어나온 이상한
-   모양(변기?)으로 보인다는 피드백 — 위쪽이 둥근 봉우리 2개인 제대로 된
-   구름 실루엣으로 다시 그림(넓은 밑변 4칸 + 위에 봉우리 2칸). 금색
-   하나만 진짜 별(클립패스, .home-star와 같은 5각별)로 남겨둔다. */
 .world-stars span {
   position: absolute;
-  width: 13px;
-  height: 13px;
+}
+/* 구름 3개(별 1개 제외) — 참고 이미지처럼 뭉치 3개(왼쪽 작게, 가운데
+   크게, 오른쪽 중간)가 겹친 뭉게뭉게한 실루엣을 24×13칸 격자로 미리
+   계산한 clip-path로 그리고, 검은 테두리는 clip-path에 안 걸리는
+   border 대신 drop-shadow를 4방향으로 겹쳐서 흉내낸다(별 모양에 쓰던
+   것과 같은 기법을 사방으로 확장). */
+.world-stars span:nth-child(1),
+.world-stars span:nth-child(3),
+.world-stars span:nth-child(4) {
+  width: 72px;
+  height: 39px;
   background: #fff;
+  clip-path: polygon(
+    45.83% 0%,
+    45.83% 7.69%,
+    41.67% 7.69%,
+    41.67% 15.38%,
+    37.5% 15.38%,
+    37.5% 23.08%,
+    16.67% 23.08%,
+    16.67% 30.77%,
+    12.5% 30.77%,
+    12.5% 38.46%,
+    8.33% 38.46%,
+    8.33% 100%,
+    91.67% 100%,
+    91.67% 92.31%,
+    95.83% 92.31%,
+    95.83% 84.62%,
+    100% 84.62%,
+    100% 46.15%,
+    95.83% 46.15%,
+    95.83% 38.46%,
+    87.5% 38.46%,
+    87.5% 30.77%,
+    79.17% 30.77%,
+    79.17% 15.38%,
+    75% 15.38%,
+    75% 7.69%,
+    70.83% 7.69%,
+    70.83% 0%
+  );
+  filter:
+    drop-shadow(1.5px 0 0 var(--ink)) drop-shadow(-1.5px 0 0 var(--ink))
+    drop-shadow(0 1.5px 0 var(--ink)) drop-shadow(0 -1.5px 0 var(--ink));
 }
 .world-stars span:nth-child(1) {
   top: 6%;
   left: 8%;
-  box-shadow:
-    13px 0 0 #fff,
-    26px 0 0 #fff,
-    39px 0 0 #fff,
-    13px -13px 0 #fff,
-    26px -13px 0 #fff;
-  opacity: 0.8;
+  opacity: 0.85;
 }
 .world-stars span:nth-child(2) {
   top: 10%;
@@ -200,25 +232,13 @@ body {
 .world-stars span:nth-child(3) {
   top: 38%;
   left: 5%;
-  box-shadow:
-    13px 0 0 #fff,
-    26px 0 0 #fff,
-    39px 0 0 #fff,
-    13px -13px 0 #fff,
-    26px -13px 0 #fff;
-  opacity: 0.75;
+  opacity: 0.8;
 }
 .world-stars span:nth-child(4) {
   top: 58%;
   right: 14%;
   transform: scale(0.85);
-  box-shadow:
-    13px 0 0 #fff,
-    26px 0 0 #fff,
-    39px 0 0 #fff,
-    13px -13px 0 #fff,
-    26px -13px 0 #fff;
-  opacity: 0.7;
+  opacity: 0.75;
 }
 
 /* 홈 화면 전용 장식(땅·나무·잔디·별) — 참가자에게 처음 보이는 화면에만
