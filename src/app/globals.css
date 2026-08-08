@@ -157,75 +157,15 @@ body {
 .world-stars span {
   position: absolute;
 }
-/* 구름 3개(별 1개 제외) — 참고 이미지처럼 뭉치 3개(왼쪽 작게, 가운데
-   크게, 오른쪽 중간)가 겹친 뭉게뭉게한 실루엣을 24×13칸 격자로 미리
-   계산한 clip-path로 그리고, 검은 테두리는 clip-path에 안 걸리는
-   border 대신 drop-shadow를 4방향으로 겹쳐서 흉내낸다(별 모양에 쓰던
-   것과 같은 기법을 사방으로 확장). */
-.world-stars span:nth-child(1),
-.world-stars span:nth-child(3),
-.world-stars span:nth-child(4) {
-  width: 72px;
-  height: 39px;
-  background: #fff;
-  clip-path: polygon(
-    45.83% 0%,
-    45.83% 7.69%,
-    41.67% 7.69%,
-    41.67% 15.38%,
-    37.5% 15.38%,
-    37.5% 23.08%,
-    16.67% 23.08%,
-    16.67% 30.77%,
-    12.5% 30.77%,
-    12.5% 38.46%,
-    8.33% 38.46%,
-    8.33% 100%,
-    91.67% 100%,
-    91.67% 92.31%,
-    95.83% 92.31%,
-    95.83% 84.62%,
-    100% 84.62%,
-    100% 46.15%,
-    95.83% 46.15%,
-    95.83% 38.46%,
-    87.5% 38.46%,
-    87.5% 30.77%,
-    79.17% 30.77%,
-    79.17% 15.38%,
-    75% 15.38%,
-    75% 7.69%,
-    70.83% 7.69%,
-    70.83% 0%
-  );
-  filter:
-    drop-shadow(1.5px 0 0 var(--ink)) drop-shadow(-1.5px 0 0 var(--ink))
-    drop-shadow(0 1.5px 0 var(--ink)) drop-shadow(0 -1.5px 0 var(--ink));
-}
-/* 음영 — 참고 이미지처럼 하늘색 계열 각진 조각 두 개를 구름 안쪽(흰
-   면이 확실한 자리로 좌표를 직접 확인해서 골랐다)에 얹어 입체감을
-   낸다. clip-path는 부모에만 걸려있고 의사요소는 그 영향을 안 받아서,
-   좌표만 구름 실루엣 안쪽으로 잘 잡으면 따로 잘라낼 필요가 없다. */
-.world-stars span:nth-child(1)::after,
-.world-stars span:nth-child(3)::after,
-.world-stars span:nth-child(4)::after {
-  content: "";
+/* 구름 — clip-path로 손수 그린 도형은 몇 차례 고쳐도 "따로 논다",
+   "구멍 난 것 같다"는 피드백이 반복돼서, 결국 사용자가 만든 픽셀아트
+   (32×19칸, public/cloud-pixel.png)를 그대로 이미지로 구워서 쓴다.
+   image-rendering: pixelated로 확대해도 흐려지지 않게 함. 위치·크기는
+   layout.tsx의 인라인 style에서 지정. */
+.world-cloud {
   position: absolute;
-  background: var(--sky-top);
-  opacity: 0.55;
-  /* 작은 사각형 두 개를 흰 면 한가운데 띄웠더니 "구멍 난 것처럼" 보였다
-     — 참고 이미지처럼 아래쪽 가장자리에 맞닿는 넓은 띠 하나로 바꿔서
-     그림자처럼 자연스럽게 이어지게 한다(격자 계산상 구름 밑변은
-     정확히 사각형이라 clip-path 없이 그냥 사각형만 놓으면 됨). */
-  left: 6px;
-  top: 24px;
-  right: 6px;
-  bottom: 0;
-}
-.world-stars span:nth-child(1) {
-  top: 3%;
-  left: 8%;
-  opacity: 0.85;
+  height: auto;
+  image-rendering: pixelated;
 }
 .world-stars span:nth-child(2) {
   top: 10%;
@@ -248,17 +188,6 @@ body {
     43% 34%
   );
   filter: drop-shadow(1px 1px 0 var(--ink));
-}
-.world-stars span:nth-child(3) {
-  top: 16%;
-  left: 5%;
-  opacity: 0.8;
-}
-.world-stars span:nth-child(4) {
-  top: 26%;
-  right: 14%;
-  transform: scale(0.85);
-  opacity: 0.75;
 }
 
 /* 홈 화면 전용 장식(땅·나무·잔디·별) — 참가자에게 처음 보이는 화면에만
