@@ -8,6 +8,7 @@ import { getRoundHistory } from "@/lib/roundHistory";
 import ActiveMultiplierBanner from "@/components/ActiveMultiplierBanner";
 import { getActiveMultiplierEvent } from "@/lib/activeMultiplier";
 import GameInProgressBadge from "@/components/GameInProgressBadge";
+import SceneDecoration from "@/components/SceneDecoration";
 import { prisma } from "@/lib/prisma";
 
 // 실시간 게임 상태를 보여주는 페이지라 절대 캐싱하면 안 된다.
@@ -42,8 +43,10 @@ export default async function WatchPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-4xl flex-col items-center justify-center gap-8 px-6 py-10 text-center">
+    <main className="mx-auto flex min-h-dvh w-full max-w-4xl flex-col items-center justify-center px-6 py-10 text-center">
+      <SceneDecoration />
       <PollRefresh intervalMs={2000} />
+      <div className="relative z-10 flex w-full flex-col items-center gap-8">
       <div className="inline-flex items-center gap-3 border-2 border-ink bg-win px-5 py-2 text-ink">
         <span className="text-lg font-black">★ ROUND {room.currentRound}</span>
       </div>
@@ -140,6 +143,7 @@ export default async function WatchPage() {
           )}
         </>
       )}
+      </div>
     </main>
   );
 }

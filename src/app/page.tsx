@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getCurrentRoom } from "@/lib/currentRoom";
 import HomeGate from "@/components/HomeGate";
-import HomeDecoration from "@/components/HomeDecoration";
+import SceneDecoration from "@/components/SceneDecoration";
 
 // 참가자 잠금 여부를 매번 새로 확인해야 하는 페이지라 캐싱하면 안 된다.
 export const dynamic = "force-dynamic";
@@ -13,7 +13,7 @@ export default async function Home() {
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-8 px-6 py-10 text-center">
-      <HomeDecoration />
+      <SceneDecoration />
       <Image
         src="/인투오락실.png"
         alt="2026 하계수련회 인투 오락실"

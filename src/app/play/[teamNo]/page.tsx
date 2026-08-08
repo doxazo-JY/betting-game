@@ -15,6 +15,7 @@ import { getRoundHistory } from "@/lib/roundHistory";
 import ActiveMultiplierBanner from "@/components/ActiveMultiplierBanner";
 import { getActiveMultiplierEvent } from "@/lib/activeMultiplier";
 import GameInProgressBadge from "@/components/GameInProgressBadge";
+import SceneDecoration from "@/components/SceneDecoration";
 
 // 실시간 게임 상태를 보여주는 페이지라 절대 캐싱하면 안 된다. 캐싱되면
 // 새로고침(router.refresh)을 해도 오래된 화면이 계속 나온다.
@@ -97,11 +98,13 @@ export default async function PlayPage({
   const myPoints = toPoints(me.currentPoints);
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 px-5 py-8">
+    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col px-5 py-8">
+      <SceneDecoration />
       <PollRefresh />
       <BackLock active={room.participantsLocked} />
       <RememberTeam teamNo={teamNo} />
 
+      <div className="relative z-10 flex flex-col gap-6">
       <header className="flex flex-col items-center gap-3">
         <span
           className={
@@ -236,6 +239,7 @@ export default async function PlayPage({
           )}
         </>
       )}
+      </div>
     </main>
   );
 }

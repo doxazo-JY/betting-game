@@ -5,6 +5,7 @@ import { setTeamName } from "./actions";
 import PollRefresh from "@/components/PollRefresh";
 import BackLock from "@/components/BackLock";
 import RememberTeam from "@/components/RememberTeam";
+import SceneDecoration from "@/components/SceneDecoration";
 
 export default function JoinForm({
   teamNo,
@@ -34,19 +35,20 @@ export default function JoinForm({
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-6 px-6 py-10 text-center">
+      <SceneDecoration />
       <PollRefresh />
       <BackLock active={locked} />
       <RememberTeam teamNo={teamNo} />
       <span
         className={
-          "border-2 border-ink px-4 py-1.5 text-sm font-black text-white " +
+          "relative z-10 border-2 border-ink px-4 py-1.5 text-sm font-black text-white " +
           (teamColor === "red" ? "bg-team-red" : "bg-team-blue")
         }
       >
         {teamNo}팀 자리
       </span>
-      <h1 className="text-2xl font-black">팀 이름을 입력하고 입장하세요</h1>
-      <div className="flex w-full flex-col gap-4">
+      <h1 className="relative z-10 text-2xl font-black">팀 이름을 입력하고 입장하세요</h1>
+      <div className="relative z-10 flex w-full flex-col gap-4">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
