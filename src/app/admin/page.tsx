@@ -2,6 +2,7 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import LinksPanel from "@/components/LinksPanel";
+import SceneDecoration from "@/components/SceneDecoration";
 import DeleteRoomButton from "./DeleteRoomButton";
 import RelinkRoomButton from "./RelinkRoomButton";
 
@@ -23,8 +24,10 @@ export default async function AdminHomePage() {
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col gap-6 px-6 py-10">
-      <h1 className="text-2xl font-black">진행자 홈</h1>
+      <SceneDecoration />
+      <h1 className="relative z-10 text-2xl font-black">진행자 홈</h1>
 
+      <div className="relative z-10 flex flex-col gap-6">
       <Link
         href="/new"
         className="border-2 border-ink bg-team-red px-6 py-5 text-center text-lg font-black text-white shadow-sticker-sm active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
@@ -81,6 +84,7 @@ export default async function AdminHomePage() {
           </div>
         ))}
       </section>
+      </div>
     </main>
   );
 }

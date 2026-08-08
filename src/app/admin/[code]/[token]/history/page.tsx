@@ -7,6 +7,7 @@ import { undoRoundResult, undoEvent, undoManualAdjust } from "../undoActions";
 import UndoButton from "../UndoButton";
 import ManualAdjustForm from "../ManualAdjustForm";
 import ResetButton from "../ResetButton";
+import SceneDecoration from "@/components/SceneDecoration";
 
 export const dynamic = "force-dynamic";
 
@@ -59,6 +60,8 @@ export default async function HistoryPage({
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-2xl flex-col gap-6 px-6 py-10">
+      <SceneDecoration />
+      <div className="relative z-10 flex flex-col gap-6">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-black">기록 / 되돌리기</h1>
         <Link
@@ -197,6 +200,7 @@ export default async function HistoryPage({
       <section className="flex justify-center border-t-2 border-ink pt-6">
         <ResetButton roomCode={room.code} adminToken={room.adminToken} />
       </section>
+      </div>
     </main>
   );
 }

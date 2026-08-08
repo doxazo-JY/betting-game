@@ -83,10 +83,10 @@ export default async function WatchPage() {
                     (joined ? "" : " opacity-35")
                   }
                 >
-                  <p className="text-2xl font-black">
+                  <p className="text-2xl font-black max-sm:text-base">
                     {joined ? team.name : `${defaultName} · 입장 대기 중`}
                   </p>
-                  <p className="text-6xl font-black tabular-nums">
+                  <p className="text-6xl font-black tabular-nums max-sm:text-3xl">
                     {toPoints(team.currentPoints).toLocaleString()}P
                   </p>
                   {result && (

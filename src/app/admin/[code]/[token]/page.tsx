@@ -14,6 +14,7 @@ import UndoButton from "./UndoButton";
 import { undoEvent } from "./undoActions";
 import { getActiveMultiplierEvent } from "@/lib/activeMultiplier";
 import { getCurrentRoom } from "@/lib/currentRoom";
+import SceneDecoration from "@/components/SceneDecoration";
 import RelinkRoomButton from "../../RelinkRoomButton";
 import ParticipantLockToggle from "./ParticipantLockToggle";
 
@@ -56,7 +57,9 @@ export default async function AdminPage({
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-2xl flex-col gap-6 px-6 py-10">
+      <SceneDecoration />
       <PollRefresh />
+      <div className="relative z-10 flex flex-col gap-6">
       <header className="flex items-start justify-between gap-1">
         <div>
           <h1 className="text-2xl font-black">진행자 화면</h1>
@@ -197,6 +200,7 @@ export default async function AdminPage({
           <GameControls roomCode={room.code} adminToken={room.adminToken} />
         </section>
       )}
+      </div>
     </main>
   );
 }
